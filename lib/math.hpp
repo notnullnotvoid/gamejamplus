@@ -1012,6 +1012,10 @@ static inline bool intersects(OBB a, OBB b) {
     return true;
 }
 
+static inline OBB obb(Rect r) {
+    return { { { r.x, r.y }, { r.x + r.w, r.y }, { r.x + r.w, r.y + r.h }, { r.x, r.y + r.h } } };
+}
+
 //TODO: function to correct the winding of points in an OBB
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

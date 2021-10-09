@@ -7,6 +7,7 @@
 
 static const float SHIELD_DISTANCE = 2.0f; //how far from the player's center they hold the shield
 static const float SHIELD_WIDTH = 5.0f; //how many units wide the shield is
+static const float SHIELD_THICKNESS = 0.4f; //how thick the shield's hitbox is
 struct Player {
     Vec2 pos;
     Vec2 vel;
@@ -17,6 +18,17 @@ struct Player {
 static inline Rect player_hitbox(Vec2 pos) {
     float w = 0.8f, h = 1.8f;
     return { pos.x - w / 2, pos.y - h / 2, w, h };
+}
+
+static inline OBB shield_hitbox(Player & player) {
+    Vec2 shieldCenter = player.pos + noz(player.cursor) * SHIELD_DISTANCE;
+    Vec2 shieldHalfOff = noz(vec2(player.cursor.y, -player.cursor.x)) * SHIELD_WIDTH * 0.5f;
+    return { {
+        shieldCenter + shieldHalfOff - noz(player.cursor) * SHIELD_THICKNESS * 0.5f,
+        shieldCenter + shieldHalfOff + noz(player.cursor) * SHIELD_THICKNESS * 0.5f,
+        shieldCenter - shieldHalfOff + noz(player.cursor) * SHIELD_THICKNESS * 0.5f,
+        shieldCenter - shieldHalfOff - noz(player.cursor) * SHIELD_THICKNESS * 0.5f,
+    } };
 }
 
 static const float BULLET_INTERVAL = 0.8f; //TODO: per-enemy interval //TODO: some randomness?
