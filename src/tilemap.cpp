@@ -58,10 +58,10 @@ void Tilemap::DrawMap(Canvas canvas, int cameraX, int cameraY) {
 
 			if (id != 0) {
 				// assuming 1 tileset
-				int tsRow = id / tilesets[0].width;
-				int tsCol = id % tilesets[0].width;
-				
-				draw_tile(canvas, tilesets[0], tsCol, tsRow, col, row);
+				int tsX = (id - 1) % tilesets[0].width;
+				int tsY = (id - 1) / tilesets[0].width;
+
+				draw_tile(canvas, tilesets[0], tsX, tsY, col * 16, row * 16);
 			}
 
 
