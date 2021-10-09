@@ -213,12 +213,7 @@ int main(int argc, char ** argv) {
             if (TICK_DOWN(G) && (HELD(LGUI) || HELD(RGUI) || HELD(LCTRL) || HELD(RCTRL))) {
                 giffing = !giffing;
                 if (giffing) {
-                    //determine actual canvas size and scale factor
-                    int bufferWidth, bufferHeight;
-                    SDL_GL_GetDrawableSize(window, &bufferWidth, &bufferHeight);
-                    float maxWidth = 480, maxHeight = 320;
-                    float scale = fminf(1, fminf(maxWidth / bufferWidth, maxHeight / bufferHeight));
-                    msf_gif_begin(&gifState, bufferWidth * scale, bufferHeight * scale);
+                    msf_gif_begin(&gifState, canvas.width, canvas.height);
                     gifTimer = 0;
                 } else {
                     MsfGifResult result = msf_gif_end(&gifState);
@@ -327,7 +322,7 @@ int main(int argc, char ** argv) {
             draw_sprite_centered(graphics.ghost, enemy.pos);
         }
         for (Bullet & bullet : level.bullets) {
-            float r1 = 7, r2 = 10; //hitbox radius and visual radius repsectively
+            float r1 = 4, r2 = 6; //hitbox radius and visual radius repsectively
             draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
                                 bullet.pos.y * PIXELS_PER_UNIT - offy, r2, r2, { 255, 0, 0, 255 });
             draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
@@ -365,18 +360,7 @@ int main(int argc, char ** argv) {
         //gif rendering
         //TODO: pull straight from the canvas
         if (giffing && gifTimer > gifCentiseconds / 100.0f) {
-            //NOTE: Because underlying canvas size can apparently change between the previous call to
-            //      SDL_GL_GetDrawableSize() and now if the window is resized, we need to call it again.
-            int bufferWidth, bufferHeight;
-            SDL_GL_GetDrawableSize(window, &bufferWidth, &bufferHeight);
-            u8 * src = (u8 *) malloc(bufferWidth * bufferHeight * sizeof(Pixel));
-            TimeLine("glReadPixels") glReadPixels(0, 0, bufferWidth, bufferHeight, GL_RGBA, GL_UNSIGNED_BYTE, src);
-            u8 * dst = (u8 *) malloc(gifState.width * gifState.height * sizeof(Pixel));
-            TimeLine("msf_resize") msf_resample(src, bufferWidth, bufferHeight, dst, gifState.width, gifState.height);
-            free(src);
-            TimeLine("msf_gif_frame") msf_gif_frame(&gifState, dst, gifCentiseconds, 15, -gifState.width * 4);
-            free(dst);
-
+            msf_gif_frame(&gifState, (uint8_t *) canvas.pixels, gifCentiseconds, 15, canvas.pitch * 4);
             gifTimer -= gifCentiseconds / 100.0f;
         }
 
