@@ -64,10 +64,6 @@ int main(int argc, char ** argv) {
             SDL_free(basePath);
         }
 
-        //ensure we are compiling and linking against the same SDL version
-        //TODO: this may break due to SDL dynlib funkiness
-        // { SDL_version version; SDL_GetVersion(&version); assert(version.patch == SDL_PATCHLEVEL); }
-
         //initialize timer and startup SDL
         TimeLine("SDL init")
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER | SDL_INIT_AUDIO)) {
@@ -143,7 +139,7 @@ int main(int argc, char ** argv) {
     print_log("[] audio init: %f seconds\n", get_time());
         float frameTimes[100] = {};
         float accumulator = 0;
-        double lastTime = 0;
+        double lastTime = get_time();
 
         InputState input = {};
         // bool leftTriggerHeld = false, rightTriggerHeld = false;
@@ -151,10 +147,6 @@ int main(int argc, char ** argv) {
         #define FRAME_DOWN(X) (input.frame.keyDown[SDL_SCANCODE_ ## X])
         #define FRAME_REPEAT(X) (input.frame.keyRepeat[SDL_SCANCODE_ ## X])
         #define FRAME_UP(X) (input.frame.keyUp[SDL_SCANCODE_ ## X])
-
-        //undo system data
-        // List<Level> undoStack = {};
-        // List<Level> redoStack = {};
 
         const int gifCentiseconds = 4;
         bool giffing = false;
@@ -239,6 +231,13 @@ int main(int argc, char ** argv) {
 
 
             //game update logic goes here
+            //apply gravity to player
+            Vec2 gravity = vec2(0, 5.0f);
+            level.player.vel += gravity * tick;
+            level.player.pos += level.player.vel * tick;
+
+            //DEBUG update cam
+            level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 10 * tick;
 
 
 
@@ -257,6 +256,12 @@ int main(int argc, char ** argv) {
         frameTimes[ARR_SIZE(frameTimes) - 1] = dt;
         timeSum += dt;
 
+        //print framerate every so often
+        float framerate = ARR_SIZE(frameTimes) / timeSum;
+        if (frameCount % 100 == 99) {
+            print_log("frame %5d     fps %3d\n", frameCount, (int)(framerate + 0.5f));
+        }
+
         //NOTE: We need to do this because glViewport() isn't called for us
         //      when the window is resized on Windows, even though it is on macOS
         int bufferWidth, bufferHeight;
@@ -273,16 +278,24 @@ int main(int argc, char ** argv) {
         glClearColor(0.01, 0.01, 0.01, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+        //calculate camera offset
+        int offx = level.camCenter.x * PIXELS_PER_UNIT - canvas.width  * 0.5f;
+        int offy = level.camCenter.y * PIXELS_PER_UNIT - canvas.height * 0.5f;
+
         //clear canvas
         for (int y = 0; y < canvas.height; ++y) {
             for (int x = 0; x < canvas.width; ++x) {
-                canvas[y][x] = { (u8) (y + frameCount), (u8) (x + frameCount), 255, 255 };
+                canvas[y][x] = { (u8) (y + offy), (u8) (x + offx), 255, 255 };
             }
         }
 
         //pixel art rendering and such goes here
+
         //draw player
-        draw_sprite(canvas, graphics.player, 0, 0);
+        Vec2 p = level.player.pos;
+        Vec2 size = vec2(graphics.player.width, graphics.player.height);
+        draw_sprite(canvas, graphics.player, p.x * PIXELS_PER_UNIT - offx - size.x * 0.5f,
+                                             p.y * PIXELS_PER_UNIT - offy - size.x * 0.5f);
 
         draw_canvas(blitShader, canvas, bufferWidth, bufferHeight);
 
