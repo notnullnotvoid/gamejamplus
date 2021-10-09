@@ -43,6 +43,4 @@ static inline Level init_level() {
 
     return level;
 }
-
-void AddTile(int id, int x, int y);
 #endif // VOXEL_LEVEL_HPP
