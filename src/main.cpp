@@ -179,6 +179,8 @@ int main(int argc, char ** argv) {
     bool shouldExit = false;
     bool fullscreen = false;
     int frameCount = 0;
+
+
     while (!shouldExit) { TimeScope("frame loop")
         double preWholeFrameTime = get_time();
 
