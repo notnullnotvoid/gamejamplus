@@ -179,9 +179,12 @@ int main(int argc, char ** argv) {
     bool shouldExit = false;
     bool fullscreen = false;
     int frameCount = 0;
+
+
+
+
     while (!shouldExit) { TimeScope("frame loop")
         double preWholeFrameTime = get_time();
-
         int windowWidth, windowHeight;
         SDL_GetWindowSize(window, &windowWidth, &windowHeight);
         int gameDisplay = SDL_GetWindowDisplayIndex(window);
@@ -329,6 +332,9 @@ int main(int argc, char ** argv) {
             draw_sprite(canvas, sprite, pos.x * PIXELS_PER_UNIT - offx - sprite.width  * 0.5f,
                                         pos.y * PIXELS_PER_UNIT - offy - sprite.height * 0.5f);
         };
+
+        //draw level
+        level.map.DrawMap(canvas, 0, 0);
 
         //draw player
         draw_sprite_centered(graphics.player, level.player.pos);
