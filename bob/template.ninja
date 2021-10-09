@@ -1,0 +1,15 @@
+ninja_required_version = 1.7
+
+rule src
+    command = clang -MMD -MF $out.d -mavx2 -std=c++17 -c $in -o $out -I../lib -D_CRT_SECURE_NO_WARNINGS -Wall -Os -fno-strict-aliasing
+    description = Build $in
+    depfile = $out.d
+rule link
+#    command = clang -ladvapi32 -lole32 -loleaut32 $in -o $out
+    command = clang $in -o $out
+    description = Link $out
+
+build $builddir/platform.o: src ../lib/platform.cpp
+build $builddir/bob.o: src bob.cpp
+
+build $executable: link $builddir/bob.o $builddir/platform.o
