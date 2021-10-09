@@ -330,6 +330,11 @@ int main(int argc, char ** argv) {
                                         pos.y * PIXELS_PER_UNIT - offy - sprite.height * 0.5f);
         };
 
+        auto draw_hitbox = [&canvas, &offx, &offy] (Rect hb) {
+            draw_rect(canvas, lroundf(hb.x * PIXELS_PER_UNIT) - offx, lroundf(hb.y * PIXELS_PER_UNIT) - offy,
+                              lroundf(hb.w * PIXELS_PER_UNIT), lroundf(hb.h * PIXELS_PER_UNIT), { 255, 100, 255, 200 });
+        };
+
         //draw level
         level.map.DrawMap(canvas, offx, offy);
 
@@ -347,24 +352,25 @@ int main(int argc, char ** argv) {
                                   shield2.x - offx + x, shield2.y - offy + y, { 128, 255, 128, 255 });
             }
         }
-        //DEBUG draw player hitbox
-        Rect hitbox = player_hitbox(level.player.pos);
-        draw_rect(canvas, lroundf(hitbox.x * PIXELS_PER_UNIT) - offx,
-                          lroundf(hitbox.y * PIXELS_PER_UNIT) - offy,
-                          lroundf(hitbox.w * PIXELS_PER_UNIT),
-                          lroundf(hitbox.h * PIXELS_PER_UNIT), { 255, 100, 255, 200 });
 
-        //draw other stuff
+        //draw enemies
         for (Enemy & enemy : level.enemies) {
             draw_sprite_centered(graphics.ghost, enemy.pos);
         }
+
+        //draw bullets
         for (Bullet & bullet : level.bullets) {
-            float r1 = 4, r2 = 6; //hitbox radius and visual radius repsectively
+            float r1 = BULLET_RADIUS * PIXELS_PER_UNIT * 1.1f; //hitbox radiuse
+            float r2 = BULLET_RADIUS * PIXELS_PER_UNIT * 1.5f; //visual radius
             draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
                                 bullet.pos.y * PIXELS_PER_UNIT - offy, r2, r2, { 255, 0, 0, 255 });
             draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
                                 bullet.pos.y * PIXELS_PER_UNIT - offy, r1, r1, { 127, 0, 0, 255 });
         }
+
+        //DEBUG draw hitboxes
+        draw_hitbox(player_hitbox(level.player.pos));
+        for (Bullet & bullet : level.bullets) draw_hitbox(bullet_hitbox(bullet.pos));
 
         //framerate display
         {

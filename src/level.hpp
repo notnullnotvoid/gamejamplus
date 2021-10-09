@@ -13,6 +13,7 @@ struct Player {
     Vec2 cursor; //virtual mouse cursor in player-relative space
 };
 
+//NOTE: I'm giving everything except the shield AABB hitboxes for now to simplify the code
 static inline Rect player_hitbox(Vec2 pos) {
     float w = 0.8f, h = 1.8f;
     return { pos.x - w / 2, pos.y - h / 2, w, h };
@@ -25,10 +26,17 @@ struct Enemy {
     float timer;
 };
 
+static const float BULLET_RADIUS = 0.5f;
 struct Bullet {
     Vec2 pos;
     Vec2 vel;
 };
+
+//TODO: collapse this with `player_hitbox()`
+static inline Rect bullet_hitbox(Vec2 pos) {
+    float w = BULLET_RADIUS * 2, h = BULLET_RADIUS * 2;
+    return { pos.x - w / 2, pos.y - h / 2, w, h };
+}
 
 struct Level {
     Player player;
