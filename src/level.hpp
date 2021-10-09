@@ -13,8 +13,13 @@ struct Player {
     Vec2 cursor; //virtual mouse cursor in player-relative space
 };
 
-static const float BULLET_INTERVAL = 1.0f; //TODO: per-enemy interval //TODO: some randomness?
-static const float BULLET_VEL = 12.0f;
+static inline Rect player_hitbox(Vec2 pos) {
+    float w = 0.8f, h = 1.8f;
+    return { pos.x - w / 2, pos.y - h / 2, w, h };
+}
+
+static const float BULLET_INTERVAL = 0.8f; //TODO: per-enemy interval //TODO: some randomness?
+static const float BULLET_VEL = 16.0f;
 struct Enemy {
     Vec2 pos;
     float timer;

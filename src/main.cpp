@@ -10,7 +10,6 @@ PREP TODOs:
 GAMEPLAY TODOS:
 - collision detect against player
 - knockback player
-- draw shield
 - collision detect against shield
 - reflect bullets against shield
 - collision detect against enemies
@@ -181,7 +180,6 @@ int main(int argc, char ** argv) {
 
 
 
-
     while (!shouldExit) { TimeScope("frame loop")
         double preWholeFrameTime = get_time();
         int windowWidth, windowHeight;
@@ -349,6 +347,12 @@ int main(int argc, char ** argv) {
                                   shield2.x - offx + x, shield2.y - offy + y, { 128, 255, 128, 255 });
             }
         }
+        //DEBUG draw player hitbox
+        Rect hitbox = player_hitbox(level.player.pos);
+        draw_rect(canvas, lroundf(hitbox.x * PIXELS_PER_UNIT) - offx,
+                          lroundf(hitbox.y * PIXELS_PER_UNIT) - offy,
+                          lroundf(hitbox.w * PIXELS_PER_UNIT),
+                          lroundf(hitbox.h * PIXELS_PER_UNIT), { 255, 100, 255, 200 });
 
         //draw other stuff
         for (Enemy & enemy : level.enemies) {
@@ -363,7 +367,6 @@ int main(int argc, char ** argv) {
         }
 
         //framerate display
-// static inline void draw_text(Canvas & canvas, MonoFont & font, int cx, int cy, Color color, const char * text) {
         {
             char buf[20] = {};
             snprintf(buf, sizeof(buf), "%4dfps", (int) lroundf(framerate));
