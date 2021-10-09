@@ -259,13 +259,27 @@ int main(int argc, char ** argv) {
                 enemy.timer -= tick;
                 if (enemy.timer < 0) {
                     enemy.timer = BULLET_INTERVAL;
+                    //TODO: make enemies partly lead their shots
                     level.bullets.add({ .pos = enemy.pos, .vel = noz(level.player.pos - enemy.pos) * BULLET_VEL });
                 }
             }
 
             //tick bullets
-            for (Bullet & bullet : level.bullets) {
+            for (int i = 0; i < level.bullets.len; ++i) {
+                Bullet & bullet = level.bullets[i];
                 bullet.pos += bullet.vel * tick;
+
+                //collide with player
+                if (intersects(bullet_hitbox(bullet.pos), player_hitbox(level.player.pos))) {
+                    level.player.vel += (bullet.vel - level.player.vel) * 0.1f; //TUNE: ratio of player vs. bullet weight
+                    //TODO: should we mix in a term here based on what side of the player the bullet hits?
+                    level.bullets.remove(i);
+                    i -= 1;
+                    continue;
+                }
+
+                //TODO: collide with shield
+                //TODO: collide with level
             }
 
             //DEBUG update cam
