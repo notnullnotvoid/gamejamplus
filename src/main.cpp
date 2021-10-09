@@ -172,6 +172,7 @@ int main(int argc, char ** argv) {
         int gameDisplay = SDL_GetWindowDisplayIndex(window);
 
         shouldExit |= process_events(input, window);
+        SDL_SetRelativeMouseMode(SDL_TRUE); //because we want a virtual mouse cursor
 
         //update timestep
         double thisTime = get_time();
@@ -231,6 +232,13 @@ int main(int argc, char ** argv) {
 
 
             //game update logic goes here
+            //update virtual cursor
+            level.player.cursor += vec2(input.tick.mouseMotion) * 0.04f;
+            float cursorRadiusInner = 1.0f, cursorRadiusOuter = 5.0f;
+            if (len(level.player.cursor) < 0.001f) level.player.cursor = vec2(0, cursorRadiusInner);
+            if (len(level.player.cursor) < cursorRadiusInner) level.player.cursor = setlen(level.player.cursor, cursorRadiusInner);
+            if (len(level.player.cursor) > cursorRadiusOuter) level.player.cursor = setlen(level.player.cursor, cursorRadiusOuter);
+
             //apply gravity to player
             Vec2 gravity = vec2(0, 5.0f);
             level.player.vel += gravity * tick;
@@ -238,6 +246,9 @@ int main(int argc, char ** argv) {
 
             //DEBUG update cam
             level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 10 * tick;
+
+            //DEBUG exit
+            if (TICK_DOWN(ESCAPE)) shouldExit = true;
 
 
 
@@ -291,11 +302,18 @@ int main(int argc, char ** argv) {
 
         //pixel art rendering and such goes here
 
+        auto draw_sprite_centered = [&canvas, &offx, &offy] (Image sprite, Vec2 pos) {
+            draw_sprite(canvas, sprite, pos.x * PIXELS_PER_UNIT - offx - sprite.width  * 0.5f,
+                                        pos.y * PIXELS_PER_UNIT - offy - sprite.height * 0.5f);
+        };
+
         //draw player
-        Vec2 p = level.player.pos;
-        Vec2 size = vec2(graphics.player.width, graphics.player.height);
-        draw_sprite(canvas, graphics.player, p.x * PIXELS_PER_UNIT - offx - size.x * 0.5f,
-                                             p.y * PIXELS_PER_UNIT - offy - size.x * 0.5f);
+        // Vec2 p = level.player.pos;
+        // Vec2 size = vec2(graphics.player.width, graphics.player.height);
+        // draw_sprite(canvas, graphics.player, p.x * PIXELS_PER_UNIT - offx - size.x * 0.5f,
+        //                                      p.y * PIXELS_PER_UNIT - offy - size.x * 0.5f);
+        draw_sprite_centered(graphics.player, level.player.pos);
+        draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
 
         draw_canvas(blitShader, canvas, bufferWidth, bufferHeight);
 

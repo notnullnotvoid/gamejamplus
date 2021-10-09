@@ -6,6 +6,7 @@
 struct Player {
     Vec2 pos;
     Vec2 vel;
+    Vec2 cursor; //virtual mouse cursor in player-relative space
 };
 
 struct Level {

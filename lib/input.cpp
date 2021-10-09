@@ -114,14 +114,19 @@ bool process_events(InputState & in, SDL_Window * window) { TimeFunc
                     break;
                 }
             }
+        } else if (event.type == SDL_MOUSEMOTION) {
+            //NOTE: We need to use mouse motion events for this in order to correctly handle relative mouse modes.
+            //      It seems to be just as responsive as SDL_GetMousePosition() on windows in relative mouse mode.
+            //      I don't remember what the problems were before. Maybe they only applied to absolute mode?
+            in.tick .mouseMotion.x += event.motion.xrel;
+            in.tick .mouseMotion.y += event.motion.yrel;
+            in.frame.mouseMotion.x += event.motion.xrel;
+            in.frame.mouseMotion.y += event.motion.yrel;
         }
     }
 
-    //handle mouse motion using SDL_GetMousePosition() because it's more responsive than events on Windows
-    Coord2 oldMousePosition = in.mousePosition;
+    //handle mouse positioning using SDL_GetMousePosition() because it's more responsive than events on Windows
     in.mousePosition = SDL_GetMousePosition(window);
-    in.tick .mouseMotion += in.mousePosition - oldMousePosition;
-    in.frame.mouseMotion += in.mousePosition - oldMousePosition;
 
     //deadzone and clamp gamepad analog controls
     for (Gamepad & pad : in.gamepads) {

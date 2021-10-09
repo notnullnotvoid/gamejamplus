@@ -6,11 +6,13 @@ static const int PIXELS_PER_UNIT = 8;
 
 struct Graphics {
     Image player;
+    Image cursor;
 };
 
 static inline Graphics load_graphics() {
     Graphics g = {};
     g.player = load_image("res/player-placeholder.png");
+    g.cursor = load_image("res/cursor.png");
     return g;
 }
 
