@@ -126,7 +126,7 @@ int main(int argc, char ** argv) {
         MonoFont font = load_mono_font("res/font-16-white.png", 8, 16);
     print_log("[] graphics init: %f seconds\n", get_time());
         settings.load();
-        Level level = {};
+        Level level = init_level();
     print_log("[] level init: %f seconds\n", get_time());
         TimeLine("SoLoud init") if (int err = loud.init(); err) printf("soloud init error: %d\n", err);
     print_log("[] soloud init: %f seconds\n", get_time());
@@ -240,7 +240,7 @@ int main(int argc, char ** argv) {
             if (len(level.player.cursor) > cursorRadiusOuter) level.player.cursor = setlen(level.player.cursor, cursorRadiusOuter);
 
             //apply gravity to player
-            Vec2 gravity = vec2(0, 5.0f);
+            Vec2 gravity = vec2(0, 3.0f);
             level.player.vel += gravity * tick;
             level.player.pos += level.player.vel * tick;
 
@@ -301,19 +301,17 @@ int main(int argc, char ** argv) {
         }
 
         //pixel art rendering and such goes here
-
         auto draw_sprite_centered = [&canvas, &offx, &offy] (Image sprite, Vec2 pos) {
             draw_sprite(canvas, sprite, pos.x * PIXELS_PER_UNIT - offx - sprite.width  * 0.5f,
                                         pos.y * PIXELS_PER_UNIT - offy - sprite.height * 0.5f);
         };
 
         //draw player
-        // Vec2 p = level.player.pos;
-        // Vec2 size = vec2(graphics.player.width, graphics.player.height);
-        // draw_sprite(canvas, graphics.player, p.x * PIXELS_PER_UNIT - offx - size.x * 0.5f,
-        //                                      p.y * PIXELS_PER_UNIT - offy - size.x * 0.5f);
         draw_sprite_centered(graphics.player, level.player.pos);
         draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
+        for (Enemy & enemy : level.enemies) {
+            draw_sprite_centered(graphics.ghost, enemy.pos);
+        }
 
         draw_canvas(blitShader, canvas, bufferWidth, bufferHeight);
 

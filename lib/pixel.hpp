@@ -367,7 +367,7 @@ static inline void draw_animation_silhouette(Canvas & canvas,
 static inline void draw_rect(Canvas & canvas, int x, int y, int w, int h, Color color) {
     int minx = imax(0, x);
     int miny = imax(0, y);
-    int maxx = imin(canvas.width, x + w);
+    int maxx = imin(canvas.width , x + w);
     int maxy = imin(canvas.height, y + h);
     for (int y = miny; y < maxy; ++y) {
         for (int x = minx; x < maxx; ++x) {
@@ -402,11 +402,42 @@ static inline void draw_line(Canvas & canvas, int x1, int y1, int x2, int y2, Co
     }
 }
 
+static inline void draw_oval_f(Canvas & canvas, float x0, float y0, float w, float h, Color color) {
+    int minx = imax(0, lroundf(x0 - w));
+    int miny = imax(0, lroundf(y0 - h));
+    int maxx = imin(canvas.width  - 1, lroundf(x0 + w));
+    int maxy = imin(canvas.height - 1, lroundf(y0 + h));
+    if (maxx < minx || maxy < miny) return;
+    float xfactor = 1.0f / w;
+    float yfactor = 1.0f / h;
+    if (color.a < 250) {
+        for (int y = miny; y <= maxy; ++y) {
+            for (int x = minx; x <= maxx; ++x) {
+                float dx = (x - x0 + 0.5f) * xfactor;
+                float dy = (y - y0 + 0.5f) * yfactor;
+                if (dx * dx + dy * dy < 1) {
+                    unsafe_blend(canvas, x, y, color);
+                }
+            }
+        }
+    } else {
+        for (int y = miny; y <= maxy; ++y) {
+            for (int x = minx; x <= maxx; ++x) {
+                float dx = (x - x0 + 0.5f) * xfactor;
+                float dy = (y - y0 + 0.5f) * yfactor;
+                if (dx * dx + dy * dy < 1) {
+                    canvas.pixels[y * canvas.pitch + x] = color;
+                }
+            }
+        }
+    }
+}
+
 static inline void draw_oval(Canvas & canvas, int x0, int y0, int w, int h, Color color) {
     int minx = imax(0, x0 - w);
     int miny = imax(0, y0 - h);
-    int maxx = imin(canvas.width, x0 + w);
-    int maxy = imin(canvas.height, y0 + h);
+    int maxx = imin(canvas.width  - 1, x0 + w);
+    int maxy = imin(canvas.height - 1, y0 + h);
     if (maxx < minx || maxy < miny) return;
     float xfactor = 1.0f / w;
     float yfactor = 1.0f / h;
@@ -436,8 +467,8 @@ static inline void draw_oval(Canvas & canvas, int x0, int y0, int w, int h, Colo
 static inline void draw_oval_add(Canvas & canvas, int x0, int y0, int w, int h, Color color) {
     int minx = imax(0, x0 - w);
     int miny = imax(0, y0 - h);
-    int maxx = imin(canvas.width, x0 + w);
-    int maxy = imin(canvas.height, y0 + h);
+    int maxx = imin(canvas.width  - 1, x0 + w);
+    int maxy = imin(canvas.height - 1, y0 + h);
     if (maxx < minx || maxy < miny) return;
     float xfactor = 1.0f / w;
     float yfactor = 1.0f / h;
@@ -457,7 +488,7 @@ void add_light(Canvas & canvas, int x0, int y0, int w, int h, Color color);
 static inline void draw_triangle(Canvas & canvas, int x1, int y1, int x2, int y2, int x3, int y3, Color c) {
     int minx = imax(0, imin(x1, imin(x2, x3)));
     int miny = imax(0, imin(y1, imin(y2, y3)));
-    int maxx = imin(canvas.width - 1, imax(x1, imax(x2, x3)));
+    int maxx = imin(canvas.width  - 1, imax(x1, imax(x2, x3)));
     int maxy = imin(canvas.height - 1, imax(y1, imax(y2, y3)));
     for (int y = miny; y <= maxy; ++y) {
         for (int x = minx; x <= maxx; ++x) {
