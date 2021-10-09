@@ -244,6 +244,20 @@ int main(int argc, char ** argv) {
             level.player.vel += gravity * tick;
             level.player.pos += level.player.vel * tick;
 
+            //tick enemies and spawn bullets
+            for (Enemy & enemy : level.enemies) {
+                enemy.timer -= tick;
+                if (enemy.timer < 0) {
+                    enemy.timer = BULLET_INTERVAL;
+                    level.bullets.add({ .pos = enemy.pos, .vel = noz(level.player.pos - enemy.pos) * BULLET_VEL });
+                }
+            }
+
+            //tick bullets
+            for (Bullet & bullet : level.bullets) {
+                bullet.pos += bullet.vel * tick;
+            }
+
             //DEBUG update cam
             level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 10 * tick;
 
@@ -311,6 +325,13 @@ int main(int argc, char ** argv) {
         draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
         for (Enemy & enemy : level.enemies) {
             draw_sprite_centered(graphics.ghost, enemy.pos);
+        }
+        for (Bullet & bullet : level.bullets) {
+            float r1 = 7, r2 = 10; //hitbox radius and visual radius repsectively
+            draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
+                                bullet.pos.y * PIXELS_PER_UNIT - offy, r2, r2, { 255, 0, 0, 255 });
+            draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
+                                bullet.pos.y * PIXELS_PER_UNIT - offy, r1, r1, { 127, 0, 0, 255 });
         }
 
         draw_canvas(blitShader, canvas, bufferWidth, bufferHeight);
