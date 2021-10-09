@@ -11,7 +11,7 @@ struct Player {
 };
 
 static const float BULLET_INTERVAL = 1.0f; //TODO: per-enemy interval //TODO: some randomness?
-static const float BULLET_VEL = 10.0f;
+static const float BULLET_VEL = 12.0f;
 struct Enemy {
     Vec2 pos;
     float timer;

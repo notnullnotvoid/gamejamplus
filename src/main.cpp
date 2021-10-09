@@ -6,6 +6,21 @@ PREP TODOs:
 - actually test new binary serialization code?
 - some generic editor stuff if I have time?
 - screenshot saving???
+
+GAMEPLAY TODOS:
+- collision detect against player
+- knockback player
+- draw shield
+- collision detect against shield
+- reflect bullets against shield
+- collision detect against enemies
+- enemy multiplication
+- collision detect against walls
+- game over state
+- timer + restart
+- player + enemy tuning
+
+- audio
 */
 
 #include "level.hpp"
