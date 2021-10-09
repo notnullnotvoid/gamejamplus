@@ -172,7 +172,6 @@ int main(int argc, char ** argv) {
     print_log("[] done initializing: %f seconds\n", get_time());
 
     const float tickLength = 1.0f/240;
-    float gameTime = 0;
     float gameSpeed = 1.0f;
     float tickSpeed = 1.0f;
 
@@ -361,6 +360,14 @@ int main(int argc, char ** argv) {
                                 bullet.pos.y * PIXELS_PER_UNIT - offy, r2, r2, { 255, 0, 0, 255 });
             draw_oval_f(canvas, bullet.pos.x * PIXELS_PER_UNIT - offx,
                                 bullet.pos.y * PIXELS_PER_UNIT - offy, r1, r1, { 127, 0, 0, 255 });
+        }
+
+        //framerate display
+// static inline void draw_text(Canvas & canvas, MonoFont & font, int cx, int cy, Color color, const char * text) {
+        {
+            char buf[20] = {};
+            snprintf(buf, sizeof(buf), "%4dfps", (int) lroundf(framerate));
+            draw_text(canvas, font, canvas.width - font.glyphWidth * 8, font.glyphHeight, { 255, 255, 255, 255 }, buf);
         }
 
         draw_canvas(blitShader, canvas, bufferWidth, bufferHeight);

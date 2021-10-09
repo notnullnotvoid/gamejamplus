@@ -53,7 +53,7 @@ static inline Image load_image(const char * filepath) {
     return { pixels, w, h };
 }
 
-static __attribute__((__always_inline__))
+static inline __attribute__((__always_inline__))
 void unsafe_blend(Canvas & canvas, int x, int y, Color color) {
     Pixel * row = canvas.pixels + y * canvas.pitch;
     row[x].r = (color.r * color.a + row[x].r * (255 - color.a)) >> 8;
@@ -61,7 +61,7 @@ void unsafe_blend(Canvas & canvas, int x, int y, Color color) {
     row[x].b = (color.b * color.a + row[x].b * (255 - color.a)) >> 8;
 }
 
-static __attribute__((__always_inline__))
+static inline __attribute__((__always_inline__))
 void blend(Canvas canvas, int x, int y, Color color) {
     if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
         Pixel * row = canvas.pixels + y * canvas.pitch;
@@ -71,7 +71,7 @@ void blend(Canvas canvas, int x, int y, Color color) {
     }
 }
 
-static __attribute__((__always_inline__))
+static inline __attribute__((__always_inline__))
 void unsafe_blend_add(Canvas & canvas, int x, int y, Color color) {
     Pixel * row = canvas.pixels + y * canvas.pitch;
     row[x].r = imin(255, row[x].r + ((color.r * color.a) >> 8));
@@ -79,7 +79,7 @@ void unsafe_blend_add(Canvas & canvas, int x, int y, Color color) {
     row[x].b = imin(255, row[x].b + ((color.b * color.a) >> 8));
 }
 
-static __attribute__((__always_inline__))
+static inline __attribute__((__always_inline__))
 void blend_add(Canvas canvas, int x, int y, Color color) {
     if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
         Pixel * row = canvas.pixels + y * canvas.pitch;
