@@ -1,16 +1,10 @@
 /*
 PREP TODOs:
 - pull in useful snippets from lance?
-- pull in something for pixel rendering?
-- pull in basic sprite rendering from lance?
-- bring in box2d?
-- do some sanity fixes to Imm?
 - window display + position settings?
-- put on github
 - super basic audio already-in-place since that tends to get neglected
 - actually test new binary serialization code?
 - some generic editor stuff if I have time?
-- gif recording???
 - screenshot saving???
 */
 
@@ -25,7 +19,8 @@ PREP TODOs:
 #include "input.hpp"
 #include "msf_resample.h"
 #include "msf_gif.h"
-#include "pixel.hpp" //TODO: instantiate this as a library translation unit so it's always compiled with optimizations?
+#include "pixel.hpp"
+#include "graphics.hpp"
 
 #include "soloud.h"
 #include "soloud_wav.h"
@@ -104,7 +99,7 @@ int main(int argc, char ** argv) {
         SDL_Window * window;
         TimeLine("CreateWindow") window = SDL_CreateWindow("GameJam+",
             SDL_WINDOWPOS_CENTERED_DISPLAY(0),
-            SDL_WINDOWPOS_CENTERED_DISPLAY(0), 1400, 800,
+            SDL_WINDOWPOS_CENTERED_DISPLAY(0), windowWidth, windowHeight,
             SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
         if (window == nullptr) {
             printf("SDL FAILED TO CREATE WINDOW: %s\n", SDL_GetError());
@@ -131,11 +126,11 @@ int main(int argc, char ** argv) {
 
         uint blitShader = create_program_from_files("res/blit.vert", "res/blit.frag");
         Canvas canvas = make_canvas(canvasWidth, canvasHeight, 16);
-        // Graphics graphics = init_graphics();
+        Graphics graphics = load_graphics();
         MonoFont font = load_mono_font("res/font-16-white.png", 8, 16);
     print_log("[] graphics init: %f seconds\n", get_time());
         settings.load();
-        //TODO: level load stuff here
+        Level level = {};
     print_log("[] level init: %f seconds\n", get_time());
         TimeLine("SoLoud init") if (int err = loud.init(); err) printf("soloud init error: %d\n", err);
     print_log("[] soloud init: %f seconds\n", get_time());
@@ -243,7 +238,7 @@ int main(int argc, char ** argv) {
 
 
 
-            //TODO: game update logic goes here
+            //game update logic goes here
 
 
 
@@ -275,17 +270,19 @@ int main(int argc, char ** argv) {
         glEnable(GL_MULTISAMPLE);
 
         //clear screen
-        glClearColor(1, 0, 1, 1);
+        glClearColor(0.01, 0.01, 0.01, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         //clear canvas
         for (int y = 0; y < canvas.height; ++y) {
             for (int x = 0; x < canvas.width; ++x) {
-                canvas[y][x] = { (u8) y, (u8) x, 255, 255 };
+                canvas[y][x] = { (u8) (y + frameCount), (u8) (x + frameCount), 255, 255 };
             }
         }
 
-        //TODO: pixel art rendering and such goes here
+        //pixel art rendering and such goes here
+        //draw player
+        draw_sprite(canvas, graphics.player, 0, 0);
 
         draw_canvas(blitShader, canvas, bufferWidth, bufferHeight);
 
@@ -316,7 +313,7 @@ int main(int argc, char ** argv) {
 
 
         //gif rendering
-        //TODO: downsize on GPU to avoid relatively slow glReadPixels call?
+        //TODO: pull straight from the canvas
         if (giffing && gifTimer > gifCentiseconds / 100.0f) {
             //NOTE: Because underlying canvas size can apparently change between the previous call to
             //      SDL_GL_GetDrawableSize() and now if the window is resized, we need to call it again.

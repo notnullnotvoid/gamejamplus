@@ -1,6 +1,8 @@
 #ifndef PIXEL_HPP
 #define PIXEL_HPP
 
+//TODO: move the implementations of most of these functions into the cpp file
+
 #include "stb_image.h"
 #include "color.hpp"
 #include "glutil.hpp"
