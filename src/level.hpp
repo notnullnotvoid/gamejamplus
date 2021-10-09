@@ -5,6 +5,8 @@
 #include "list.hpp"
 #include "tilemap.h"
 
+static const float SHIELD_DISTANCE = 2.0f; //how far from the player's center they hold the shield
+static const float SHIELD_WIDTH = 5.0f; //how many units wide the shield is
 struct Player {
     Vec2 pos;
     Vec2 vel;

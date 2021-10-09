@@ -261,6 +261,10 @@ static inline Vec2 vec2(Coord2 c) { return { (float) c.x, (float) c.y           
 static inline Vec3 vec3(Coord3 c) { return { (float) c.x, (float) c.y, (float) c.z              }; }
 static inline Vec4 vec4(Coord4 c) { return { (float) c.x, (float) c.y, (float) c.z, (float) c.w }; }
 
+static inline Coord2 coord2(Vec2 v) { return { lroundf(v.x), lroundf(v.y)                             }; }
+static inline Coord3 coord2(Vec3 v) { return { lroundf(v.x), lroundf(v.y), lroundf(v.z)               }; }
+static inline Coord4 coord2(Vec4 v) { return { lroundf(v.x), lroundf(v.y), lroundf(v.z), lroundf(v.w) }; }
+
 //comparators
 static inline bool operator==(Coord2 l, Coord2 r) { return l.x == r.x && l.y == r.y                            ; }
 static inline bool operator==(Coord3 l, Coord3 r) { return l.x == r.x && l.y == r.y && l.z == r.z              ; }

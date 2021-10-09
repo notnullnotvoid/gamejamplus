@@ -91,7 +91,7 @@ int main(int argc, char ** argv) {
         const int pixelScale = 3;
         const int windowWidth = canvasWidth * pixelScale;
         const int windowHeight = canvasHeight * pixelScale;
-        const int windowDisplay = 0;
+        // const int windowDisplay = 0;
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -339,6 +339,19 @@ int main(int argc, char ** argv) {
         //draw player
         draw_sprite_centered(graphics.player, level.player.pos);
         draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
+        //draw shield
+        Vec2 shieldCenter = level.player.pos + noz(level.player.cursor) * SHIELD_DISTANCE;
+        Vec2 shieldHalfOff = noz(vec2(level.player.cursor.y, -level.player.cursor.x)) * SHIELD_WIDTH * 0.5f;
+        Coord2 shield1 = coord2((shieldCenter + shieldHalfOff) * PIXELS_PER_UNIT);
+        Coord2 shield2 = coord2((shieldCenter - shieldHalfOff) * PIXELS_PER_UNIT);
+        for (int y = -1; y <= +1; ++y) {
+            for (int x = -1; x <= +1; ++x) {
+                draw_line(canvas, shield1.x - offx + x, shield1.y - offy + y,
+                                  shield2.x - offx + x, shield2.y - offy + y, { 128, 255, 128, 255 });
+            }
+        }
+
+        //draw other stuff
         for (Enemy & enemy : level.enemies) {
             draw_sprite_centered(graphics.ghost, enemy.pos);
         }
