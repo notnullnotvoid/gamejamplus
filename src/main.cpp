@@ -334,7 +334,7 @@ int main(int argc, char ** argv) {
         };
 
         //draw level
-        level.map.DrawMap(canvas, 0, 0);
+        level.map.DrawMap(canvas, offx, offy);
 
         //draw player
         draw_sprite_centered(graphics.player, level.player.pos);
