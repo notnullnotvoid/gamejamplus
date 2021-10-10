@@ -4,8 +4,7 @@
 #include "math.hpp"
 #include "list.hpp"
 #include "tilemap.h"
-
-#include <iostream>
+#include "trace.hpp"
 
 //NOTE: only the ratios of different masses matter, so the units are unimportant, imagine they're kilograms
 static const float PLAYER_MASS = 50;
@@ -80,15 +79,18 @@ struct Level {
     TileGrid tiles;
 };
 
-static inline void draw_tile_grid(Canvas & canvas, TileGrid & tiles, Tileset & tileset, int offx, int offy) {
-    //TODO: only draw tiles in screen bounds
-    for (int y = 0; y < tiles.height; ++y) {
-        for (int x = 0; x < tiles.width; ++x) {
+static inline void draw_tile_grid(Canvas & canvas, TileGrid & tiles, Tileset & tileset, int offx, int offy) { TimeFunc
+    int minx = imax(0, floorf(offx / PIXELS_PER_TILE));
+    int miny = imax(0, floorf(offy / PIXELS_PER_TILE));
+    int maxx = imin(tiles.width , ceilf((offx + canvas.width ) / PIXELS_PER_TILE));
+    int maxy = imin(tiles.height, ceilf((offy + canvas.height) / PIXELS_PER_TILE));
+    for (int y = miny; y < maxy; ++y) {
+        for (int x = minx; x < maxx; ++x) {
             for (int i = 0; i < 3; ++i) {
                 if (tiles[y][x].layer[i] >= 0) {
                     int tx = tiles[y][x].layer[i] % tileset.width;
                     int ty = tiles[y][x].layer[i] / tileset.width;
-                    draw_tile(canvas, tileset, tx, ty, x * PIXELS_PER_TILE - offx, y * PIXELS_PER_TILE - offy);
+                    draw_tile_a1(canvas, tileset, tx, ty, x * PIXELS_PER_TILE - offx, y * PIXELS_PER_TILE - offy);
                 }
             }
         }

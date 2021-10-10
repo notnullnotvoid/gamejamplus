@@ -224,6 +224,7 @@ int main(int argc, char ** argv) {
                     //std::cout << "Debug!" << std::endl;
                 }
             }
+
             //toggle gif recording
             if (TICK_DOWN(G) && (HELD(LGUI) || HELD(RGUI) || HELD(LCTRL) || HELD(RCTRL))) {
                 giffing = !giffing;
@@ -238,6 +239,14 @@ int main(int argc, char ** argv) {
                     msf_gif_free(result);
                 }
             }
+
+            //print profiling trace
+            if (TICK_DOWN(BACKSLASH) && (HELD(LCTRL) || HELD(RCTRL))) {
+                print_profiling_trace();
+                print_log("printed profiling trace\n");
+            }
+
+
 
             //game update logic goes here
             //update virtual cursor
