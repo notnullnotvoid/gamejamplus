@@ -8,7 +8,9 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- enemy physics
+- sequential / random map loading
+- collision of player and enemies against level
+- enemy physics???
 - collision detect against enemies
 - enemy multiplication
 - collision detect against walls
