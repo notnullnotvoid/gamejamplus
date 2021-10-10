@@ -20,6 +20,12 @@
          "id":2,
          "name":"collision",
          "opacity":1,
+         "properties":[
+                {
+                 "name":"impassable",
+                 "type":"bool",
+                 "value":true
+                }],
          "type":"tilelayer",
          "visible":true,
          "width":80,

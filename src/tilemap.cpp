@@ -57,8 +57,8 @@ void Tilemap::LoadMap(std::string path) {
 		for (int i = 0; i < readTilesets.size(); i++) {
 			json t = readTilesets[i];
 
-			std::string imgName = t["name"];
-			std::string fullName = "res/" + imgName; // manually added file extension to value; isn't native to the tiled output
+			std::string imgName = t["image"];
+			std::string fullName = "res/" + imgName; // make sure that you're embedding the tileset into the map so it passes the correct file name!
 
 			Tileset set = load_tileset(&fullName[0], 16, 16);
 			tilesets.emplace_back(set);
