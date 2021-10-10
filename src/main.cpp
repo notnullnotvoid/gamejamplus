@@ -8,9 +8,8 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- collision detect against walls
-- bounded follow cam
 - game over state + restart
+- bounded follow cam
 - distance counter
 - walker enemy type
 - player + enemy tuning
