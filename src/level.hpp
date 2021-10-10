@@ -72,11 +72,26 @@ struct TileGrid {
     }
 };
 
+static const float WALKER_ATTACK_TIME = 0.3f;
+static const float WALKER_HOME_RADIUS = 5.0f;
+static const float WALKER_AGRO_RANGE = 20.0f;
+static const float WALKER_ATTACK_RANGE = 3.0f;
+static const float WALKER_WALK_SPEED = 3.0f;
+static const float WALK_ANIM_SPEED = 4.0f; //frames per second
+struct Walker {
+    Vec2 home;
+    Vec2 pos;
+    float walkTimer; //drives the walk animation, counts up as long as the walker is moving
+    float attackTimer; //counts down from `WALKER_ATTACK_TIME` to 0, overrides walking action
+    bool facingRight;
+};
+
 struct Level {
     Player player;
     Vec2 camCenter;
     List<Enemy> enemies;
-    List<Bullet> bullets; //TODO: some criteria for despawning bullets
+    List<Walker> walkers;
+    List<Bullet> bullets;
     TileGrid tiles;
     Vec2 playerStartPos;
 };
@@ -143,11 +158,14 @@ static inline Level init_level() {
                     section.mapLayers[2].data[section.mapLayers[2].width * y + x] - 1,
                 } };
                 static const int ghostIdx = 2;
-                // static const int walkerIdx = 6;
+                static const int walkerIdx = 6;
                 int enemyIdx = section.mapLayers[3].data[section.mapLayers[3].width * y + x] - 1;
                 if (enemyIdx == ghostIdx) {
                     level.enemies.add({ .pos = vec2(x + xstart + rand_float(), y + 0.5f) * UNITS_PER_TILE,
                                         .timer = rand_float(BULLET_INTERVAL / BULLET_INTERVAL_VARIANCE) });
+                } else if (enemyIdx == walkerIdx) {
+                    Vec2 pos = vec2(x + xstart + rand_float(), y) * UNITS_PER_TILE;
+                    level.walkers.add({ .home = pos, .pos = pos });
                 }
             }
         }

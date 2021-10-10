@@ -8,7 +8,6 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- distance counter
 - walker enemy type
 - player + enemy tuning
 - audio
@@ -439,6 +438,11 @@ int main(int argc, char ** argv) {
                                         pos.y * PIXELS_PER_UNIT - offy - sprite.height * 0.5f);
         };
 
+        auto draw_anim_centered = [&canvas, &offx, &offy] (Tileset anim, Vec2 pos, int frame) {
+            draw_tile(canvas, anim, frame % anim.width, 0, pos.x * PIXELS_PER_UNIT - offx - anim.tileWidth  * 0.5f,
+                                                           pos.y * PIXELS_PER_UNIT - offy - anim.tileHeight * 0.5f);
+        };
+
         auto draw_hitbox = [&canvas, &offx, &offy] (Rect hb) {
             draw_rect(canvas, lroundf(hb.x * PIXELS_PER_UNIT) - offx, lroundf(hb.y * PIXELS_PER_UNIT) - offy,
                               lroundf(hb.w * PIXELS_PER_UNIT), lroundf(hb.h * PIXELS_PER_UNIT), { 255, 100, 255, 200 });
@@ -464,6 +468,10 @@ int main(int argc, char ** argv) {
         //draw enemies
         for (Enemy & enemy : level.enemies) {
             draw_sprite_centered(graphics.ghost, enemy.pos);
+        }
+
+        for (Walker & walker : level.walkers) {
+            draw_anim_centered(graphics.walkerWalk, walker.pos, 0);
         }
 
         //draw bullets
