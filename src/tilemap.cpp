@@ -19,26 +19,38 @@ void Tilemap::LoadMap(std::string path) {
 		for (int i = 0; i < readLayers.size(); i++) {
 			json l = readLayers[i];
 
-			TileLayer layer = {	};
-			layer.data = l["data"].get<std::vector<int>>();
-			layer.height = l["height"];
-			layer.width = l["width"];
-			layer.xOffset = l["x"];
-			layer.yOffset = l["y"];
-			
-			if (l.contains("properties")) {
-				json props = l["properties"];
+			// Map layers
+			if (l.contains("data")) {
+				TileLayer layer = {	};
+				layer.data = l["data"].get<std::vector<int>>();
+				layer.height = l["height"];
+				layer.width = l["width"];
+				layer.xOffset = l["x"];
+				layer.yOffset = l["y"];
 
-				for (auto &p : props) {
-					std::string name = p["name"];
-					if (name == "impassable") {
-						layer.impassable = p["value"];
-						continue;
+				if (l.contains("properties")) {
+					json props = l["properties"];
+
+					for (auto &p : props) {
+						std::string name = p["name"];
+						if (name == "impassable") {
+							layer.impassable = p["value"];
+							continue;
+						}
 					}
 				}
+
+				mapLayers.emplace_back(layer);
 			}
 
-			mapLayers.emplace_back(layer);
+			else if (l.contains("objects")) {
+				for (auto &obj : l["objects"]) {
+					Vec2 pos{};
+					pos.x = obj["x"];
+					pos.y = obj["y"];
+					enemySpawnPoints.emplace_back(pos);
+				}
+			}
 		}
 
 		auto readTilesets = j["tilesets"];
@@ -74,7 +86,6 @@ void Tilemap::DrawMap(Canvas canvas, int cameraX, int cameraY) {
 
 				draw_tile(canvas, tilesets[0], tsX, tsY, col * 16 - cameraX, row * 16 - cameraY);
 			}
-
 
 			col++;
 			if (col == mapLayers[i].width) {

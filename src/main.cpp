@@ -225,6 +225,7 @@ int main(int argc, char ** argv) {
             }
 
             //toggle gif recording
+            /*
             if (TICK_DOWN(G) && (HELD(LGUI) || HELD(RGUI) || HELD(LCTRL) || HELD(RCTRL))) {
                 giffing = !giffing;
                 if (giffing) {
@@ -238,8 +239,7 @@ int main(int argc, char ** argv) {
                     msf_gif_free(result);
                 }
             }
-
-
+            */
 
             //game update logic goes here
             //update virtual cursor
