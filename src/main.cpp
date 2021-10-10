@@ -8,18 +8,16 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- sequential / random map loading
-- bounded follow cam
-- collision of player and enemies against level
-- enemy physics???
-- collision detect against enemies
-- enemy multiplication
+- procedural map stuff
 - collision detect against walls
-- game over state
-- timer + restart
+- bounded follow cam
+- game over state + restart
+- distance counter
 - player + enemy tuning
-
 - audio
+- collision detect against enemies?
+- enemy multiplication?
+- enemy physics???
 */
 
 #include "level.hpp"
