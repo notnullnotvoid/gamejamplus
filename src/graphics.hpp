@@ -2,7 +2,7 @@
 #define GRAPHICS_HPP
 
 //NOTE: positive y goes down in this game, defying established convention, because that makes my life easier
-static const int PIXELS_PER_UNIT = 8;
+static const float PIXELS_PER_UNIT = 8;
 
 struct Graphics {
     Image player;

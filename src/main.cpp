@@ -8,12 +8,12 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- game over state + restart
 - bounded follow cam
 - distance counter
 - walker enemy type
 - player + enemy tuning
 - audio
+- tutorial text
 - collision detect against enemies?
 - enemy multiplication?
 - enemy physics???
@@ -41,7 +41,32 @@ GAMEPLAY TODOS:
 #include "imgui_impl_opengl3.h"
 #include <SDL.h>
 
-#include <iostream>
+struct DebugToggleData { bool * b; const char * s1; const char * s2; };
+static List<DebugToggleData> debugToggles = {};
+
+inline static bool debug_toggle_impl(bool & b, bool c, const char * s1, const char * s2) {
+    if (c && !ImGui::GetIO().WantCaptureKeyboard) {
+#if !CONFIG_RELEASE
+        b = !b;
+        print_log("%s = %s\n", s1, b? "true" : "false");
+#endif
+    }
+
+    bool alreadyAdded = false;
+    for (DebugToggleData & toggle : debugToggles) {
+        if (toggle.b == &b) { //should this comparison include the strings (instead)? idk
+            alreadyAdded = true;
+            break;
+        }
+    }
+    if (!alreadyAdded) {
+        debugToggles.add({ &b, s1, s2 });
+    }
+
+    return c;
+};
+#define DEBUG_TOGGLE(name, cond) debug_toggle_impl(name, cond, #name, #cond)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AUDIO                                                                                                            ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -220,7 +245,6 @@ int main(int argc, char ** argv) {
                     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
                 } else {
                     SDL_SetWindowFullscreen(window, 0);
-                    //std::cout << "Debug!" << std::endl;
                 }
             }
 
@@ -276,7 +300,7 @@ int main(int argc, char ** argv) {
                 //NOTE: it's important to apply the proximity effect to how fast the timer counts down
                 //      instead of to its starting value, since the latter will inherently create some lag
                 //      in the responsiveness of the effect
-                float proximity = 0.4f * powf(len(enemy.pos - level.player.pos), 1.0f / 3);
+                float proximity = 0.2f * powf(len(enemy.pos - level.player.pos), 1.0f / 2);
                 enemy.timer -= tick / fmaxf(0.2f, proximity);
                 if (enemy.timer < 0) {
                     float random = rand_float(BULLET_INTERVAL_VARIANCE, 1 / BULLET_INTERVAL_VARIANCE);
@@ -340,8 +364,18 @@ int main(int argc, char ** argv) {
                 }
             }
 
-            //DEBUG update cam
-            level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 50 * tick;
+            //update camera
+            //TODO: make this tickrate-independent
+            static bool debugCam = false;
+            DEBUG_TOGGLE(debugCam, TICK_DOWN(F));
+            if (debugCam) {
+                level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 50 * tick;
+            } else {
+                level.camCenter += (level.player.pos - level.camCenter) * 0.01f;
+                level.camCenter.x = fmaxf(level.camCenter.x, canvas.width / 2.0f / PIXELS_PER_UNIT);
+                level.camCenter.y = fmaxf(level.camCenter.y, canvas.height / 2.0f / PIXELS_PER_UNIT);
+                level.camCenter.y = fminf(level.camCenter.y, level.tiles.height * UNITS_PER_TILE - canvas.height / 2 / PIXELS_PER_UNIT);
+            }
 
             //DEBUG exit
             if (TICK_DOWN(ESCAPE)) shouldExit = true;
@@ -452,10 +486,11 @@ int main(int argc, char ** argv) {
             snprintf(buf, sizeof(buf), "You made it %d meters toward freedom...", 0); //TODO: actual score counter
             draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 0 * font.glyphHeight, white, buf);
             draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 3 * font.glyphHeight, white, "Press R to try again.");
+        }
 
-            if (FRAME_DOWN(R)) {
-                level = init_level();
-            }
+        //level restart
+        if (FRAME_DOWN(R)) {
+            level = init_level();
         }
 
         //framerate display
