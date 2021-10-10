@@ -8,8 +8,7 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- collision detect against shield
-- reflect bullets against shield
+- enemy physics
 - collision detect against enemies
 - enemy multiplication
 - collision detect against walls
@@ -168,7 +167,7 @@ int main(int argc, char ** argv) {
         gl_error("program init");
     print_log("[] done initializing: %f seconds\n", get_time());
 
-    const float tickLength = 1.0f/240;
+    const float tickLength = 1.0f/250;
     float gameSpeed = 1.0f;
     float tickSpeed = 1.0f;
 
@@ -258,20 +257,23 @@ int main(int argc, char ** argv) {
                 if (enemy.timer < 0) {
                     enemy.timer = BULLET_INTERVAL;
                     //TODO: make enemies partly lead their shots
-                    level.bullets.add({ .pos = enemy.pos, .vel = noz(level.player.pos - enemy.pos) * BULLET_VEL });
+                    level.bullets.add({ .pos = enemy.pos, .vel = noz(level.player.pos - enemy.pos) * BULLET_VEL_MAX });
                 }
             }
 
             //tick bullets
             for (int i = 0; i < level.bullets.len; ++i) {
                 Bullet & bullet = level.bullets[i];
+                //bullet velocity exponentially decays from the starting velocity down to BULLET_VEL_MIN
+                bullet.vel = noz(bullet.vel) * (BULLET_VEL_MIN + (len(bullet.vel) - BULLET_VEL_MIN) * powf(0.4f, tick));
+                // bullet.vel *= powf(0.1f, tick);
                 bullet.pos += bullet.vel * tick;
 
                 //collide with player
                 if (intersects(bullet_hitbox(bullet.pos), player_hitbox(level.player.pos))) {
-                    //TODO: base this on the define masses
-                    level.player.vel += (bullet.vel - level.player.vel) * 0.1f; //TUNE: ratio of player vs. bullet weight
-                    //TODO: should we mix in a term here based on what side of the player the bullet hits?
+                    level.player.vel += (bullet.vel - level.player.vel) * (BULLET_MASS / PLAYER_MASS) * 0.5f;
+                    Vec2 normal = noz(level.player.pos - bullet.pos);
+                    level.player.vel += normal * fmaxf(0, dot(bullet.vel, normal)) * (BULLET_MASS / PLAYER_MASS) * 0.5f;
                     level.bullets.remove(i);
                     i -= 1;
                     continue;
