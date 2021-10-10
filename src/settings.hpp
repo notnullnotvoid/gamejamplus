@@ -3,6 +3,7 @@
 
 struct Settings {
     float sfxVolume, musicVolume; //out of 1;
+    float bestDistance;
 
     void load();
     bool save();

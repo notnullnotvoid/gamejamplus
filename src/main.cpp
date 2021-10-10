@@ -291,6 +291,8 @@ int main(int argc, char ** argv) {
                 //kill player if they touch any solid geometry
                 if (collide_with_tiles(level.tiles, player_hitbox(level.player.pos))) {
                     level.player.dead = true;
+                    settings.bestDistance = fmaxf(settings.bestDistance, level.player.pos.x - level.playerStartPos.x);
+                    settings.save();
                 }
             }
 
@@ -493,11 +495,13 @@ int main(int argc, char ** argv) {
         if (level.player.dead) {
             draw_rect(canvas, 0, 0, canvas.width, canvas.height, { 0, 0, 0, 160 });
             Color white = { 255, 255, 255, 255 };
-            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 - 3 * font.glyphHeight, white, "GAME OVER");
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 - 6 * font.glyphHeight, white, "GAME OVER");
             char buf[100] = {};
             snprintf(buf, sizeof(buf), "You made it %.0f meters toward freedom...", level.player.pos.x - level.playerStartPos.x);
-            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 0 * font.glyphHeight, white, buf);
-            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 3 * font.glyphHeight, white, "Press R to try again.");
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 - 2 * font.glyphHeight, white, buf);
+            snprintf(buf, sizeof(buf), "Your personal best is %0.f meters.", settings.bestDistance);
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 2 * font.glyphHeight, white, buf);
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 6 * font.glyphHeight, white, "Press R to try again.");
         }
 
         //level restart

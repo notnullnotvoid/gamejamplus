@@ -20,6 +20,8 @@ void Settings::load() { TimeFunc
                 sfxVolume = atof(strtok(nullptr, " \t"));
             } else if (!strcmp(token, "music")) {
                 musicVolume = atof(strtok(nullptr, " \t"));
+            } else if (!strcmp(token, "record")) {
+                bestDistance = atof(strtok(nullptr, " \t"));
             }
         }
         free(raw);
@@ -32,6 +34,7 @@ bool Settings::save() { TimeFunc
     if (!f) return false;
     fprintf(f, "sfx %f\n", sfxVolume);
     fprintf(f, "music %f\n", musicVolume);
+    fprintf(f, "record %f\n", bestDistance);
     if (fclose(f) != 0) return false;
     return true;
 }
