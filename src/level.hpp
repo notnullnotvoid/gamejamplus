@@ -73,10 +73,10 @@ struct TileGrid {
 };
 
 static const float WALKER_ATTACK_TIME = 0.3f;
-static const float WALKER_HOME_RADIUS = 5.0f;
-static const float WALKER_AGRO_RANGE = 20.0f;
-static const float WALKER_ATTACK_RANGE = 3.0f;
-static const float WALKER_WALK_SPEED = 3.0f;
+static const float WALKER_HOME_RADIUS = 10.0f;
+static const float WALKER_AGRO_RANGE = 25.0f;
+static const float WALKER_ATTACK_RANGE = 5.0f;
+static const float WALKER_WALK_SPEED = 8.0f;
 static const float WALK_ANIM_SPEED = 4.0f; //frames per second
 struct Walker {
     Vec2 home;

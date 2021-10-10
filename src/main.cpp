@@ -368,12 +368,29 @@ int main(int argc, char ** argv) {
 
             //tick walkers
             for (Walker & walker : level.walkers) {
+                //attack
                 if (walker.attackTimer == 0 && len(level.player.pos - walker.pos) < WALKER_ATTACK_RANGE) {
                     level.player.vel.y = 0;
                     level.player.vel -= noz(level.player.cursor) * 20;
                     walker.attackTimer = WALKER_ATTACK_TIME;
+                    walker.walkTimer = 0;
                 }
                 walker.attackTimer = fmaxf(0, walker.attackTimer - tick);
+
+                //walk
+                if (walker.attackTimer == 0 && len(level.player.pos - walker.pos) < WALKER_AGRO_RANGE) {
+                    if (walker.pos.x > walker.home.x - WALKER_HOME_RADIUS && level.player.pos.x < walker.pos.x - 0.1f) {
+                        walker.pos.x -= WALKER_WALK_SPEED * tick;
+                        walker.walkTimer += tick;
+                        walker.facingRight = false;
+                    } else if (walker.pos.x < walker.home.x + WALKER_HOME_RADIUS && level.player.pos.x > walker.pos.x + 0.1f) {
+                        walker.pos.x += WALKER_WALK_SPEED * tick;
+                        walker.walkTimer += tick;
+                        walker.facingRight = true;
+                    } else {
+                        walker.walkTimer = 0;
+                    }
+                }
             }
 
             //update camera
