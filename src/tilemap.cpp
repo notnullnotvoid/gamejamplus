@@ -27,6 +27,19 @@ void Tilemap::LoadMap(std::string path) {
 			layer.width = l["width"];
 			layer.xOffset = l["x"];
 			layer.yOffset = l["y"];
+			
+			/*
+			json props = l["properties"];
+
+			if (props != NULL) {
+				layer.impassable = props["impassable"];
+			}
+			else {
+				layer.impassable = false;
+			}
+			*/
+			std::cout << layer.impassable << std::endl;
+
 			mapLayers.emplace_back(layer);
 		}
 

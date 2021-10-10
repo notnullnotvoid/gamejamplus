@@ -11,6 +11,7 @@ struct TileLayer {
 	int width;
 	int xOffset;
 	int yOffset;
+	bool impassable;
 };
 /*
 struct TileSet {
