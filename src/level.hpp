@@ -39,8 +39,8 @@ static inline OBB shield_hitbox(Player & player) {
 
 static const float BULLET_INTERVAL = 1.0f; //TODO: per-enemy interval
 static const float BULLET_INTERVAL_VARIANCE = 1.3f;
-static const float BULLET_VEL_MAX = 32.0f;
-static const float BULLET_VEL_MIN = 12.0f;
+static const float BULLET_VEL_MAX = 40.0f;
+static const float BULLET_VEL_MIN = 16.0f;
 struct Enemy {
     Vec2 pos;
     float timer;
@@ -175,7 +175,8 @@ static inline Level init_level() {
     printf("sectionCount: %d\n", sectionCount);
 
     //spawn debug/test setup
-    level.playerStartPos = level.player.pos = vec2(20, 20);
+    // level.playerStartPos = level.player.pos = vec2(20, 20);
+    level.playerStartPos = level.player.pos = vec2(80, 60);
     // level.enemies.add({ .pos = vec2(-10 + 20, 10 + 30) });
     // level.enemies.add({ .pos = vec2(  3 + 20, 12 + 30) });
     // level.enemies.add({ .pos = vec2( 11 + 20, 10 + 30) });

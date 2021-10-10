@@ -315,7 +315,6 @@ int main(int argc, char ** argv) {
                 }
             }
 
-
             //tick bullets
             for (int i = 0; i < level.bullets.len; ++i) {
                 Bullet & bullet = level.bullets[i];
@@ -365,6 +364,16 @@ int main(int argc, char ** argv) {
                         level.player.vel -= normal * (impulse / PLAYER_MASS);
                     }
                 }
+            }
+
+            //tick walkers
+            for (Walker & walker : level.walkers) {
+                if (walker.attackTimer == 0 && len(level.player.pos - walker.pos) < WALKER_ATTACK_RANGE) {
+                    level.player.vel.y = 0;
+                    level.player.vel -= noz(level.player.cursor) * 20;
+                    walker.attackTimer = WALKER_ATTACK_TIME;
+                }
+                walker.attackTimer = fmaxf(0, walker.attackTimer - tick);
             }
 
             //update camera
@@ -471,6 +480,10 @@ int main(int argc, char ** argv) {
         }
 
         for (Walker & walker : level.walkers) {
+            if (walker.attackTimer > 0) {
+                draw_anim_centered(graphics.walkerAttack, walker.pos,
+                                   (1 - (walker.attackTimer / WALKER_ATTACK_TIME)) * graphics.walkerAttack.width);
+            }
             draw_anim_centered(graphics.walkerWalk, walker.pos, 0);
         }
 
