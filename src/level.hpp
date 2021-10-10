@@ -99,7 +99,7 @@ static inline Level init_level() {
     Level level = {};
 
     //load Tiled section prefabs
-    Tilemap sections[3];
+    Tilemap sections[6];
     for (int i = 0; i < ARR_SIZE(sections); ++i) {
         sections[i].LoadMap(dsprintf(nullptr, "res/section%d.json", i)); //leak
         assert(sections[i].mapLayers.size() == 4);
@@ -109,22 +109,28 @@ static inline Level init_level() {
         assert(sections[i].mapLayers[3].height == 50);
     }
 
-    //TODO: generate tile grid by placing sections end-to-end
-
     //copy section0 data to the tile grid
-    int width = 1000, height = 50;
+    int width = 100000, height = 50, xstart = 0, sectionCount = 0;
     level.tiles = { (Tile *) malloc(width * height * sizeof(Tile)), width, height };
-    Tilemap & section = sections[0];
-    for (int y = 0; y < 50; ++y) {
-        for (int x = 0; x < section.mapLayers[0].width; ++x) {
-            level.tiles[y][x] = { {
-                section.mapLayers[0].data[section.mapLayers[0].width * y + x] - 1,
-                section.mapLayers[1].data[section.mapLayers[1].width * y + x] - 1,
-                section.mapLayers[2].data[section.mapLayers[2].width * y + x] - 1,
-            } };
-            //TODO: place enemies
+    while (xstart < width - 500) { //magic number here should be >= largest section width
+        int sectionIdx = rand_int(1, ARR_SIZE(sections));
+        if (xstart == 0) sectionIdx = 0;
+        Tilemap & section = sections[sectionIdx];
+        for (int y = 0; y < 50; ++y) {
+            for (int x = 0; x < section.mapLayers[0].width; ++x) {
+                level.tiles[y][x + xstart] = { {
+                    section.mapLayers[0].data[section.mapLayers[0].width * y + x] - 1,
+                    section.mapLayers[1].data[section.mapLayers[1].width * y + x] - 1,
+                    section.mapLayers[2].data[section.mapLayers[2].width * y + x] - 1,
+                } };
+                //TODO: place enemies
+            }
         }
+        xstart += section.mapLayers[0].width;
+        ++sectionCount;
     }
+    printf("sectionCount: %d\n", sectionCount);
+
     //spawn debug/test setup
     level.player.pos = vec2(20, 20);
     level.enemies.add({ .pos = vec2(-10 + 20, 10 + 30) });

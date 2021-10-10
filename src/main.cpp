@@ -84,9 +84,9 @@ int main(int argc, char ** argv) {
             exit(1);
         }
     print_log("[] SDL init: %f seconds\n", get_time());
-        const int canvasWidth = 420;
-        const int canvasHeight = 240;
-        const int pixelScale = 3;
+        const int canvasWidth = 640;
+        const int canvasHeight = 360;
+        const int pixelScale = 2;
         const int windowWidth = canvasWidth * pixelScale;
         const int windowHeight = canvasHeight * pixelScale;
         // const int windowDisplay = 0;
@@ -315,7 +315,7 @@ int main(int argc, char ** argv) {
             }
 
             //DEBUG update cam
-            level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 10 * tick;
+            level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 50 * tick;
 
             //DEBUG exit
             if (TICK_DOWN(ESCAPE)) shouldExit = true;
