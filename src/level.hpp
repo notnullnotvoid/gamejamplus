@@ -133,7 +133,7 @@ static inline Level init_level() {
     Level level = {};
 
     //load Tiled section prefabs
-    Tilemap sections[6];
+    Tilemap sections[10];
     for (int i = 0; i < ARR_SIZE(sections); ++i) {
         sections[i].LoadMap(dsprintf(nullptr, "res/section%d.json", i)); //leak
         assert(sections[i].mapLayers.size() == 4);

@@ -8,7 +8,7 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- walker enemy type
+- fix up sections
 - player + enemy tuning
 - audio
 - tutorial text
