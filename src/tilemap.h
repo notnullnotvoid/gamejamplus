@@ -11,15 +11,9 @@ struct TileLayer {
 	int width;
 	int xOffset;
 	int yOffset;
+	bool impassable;
 };
-/*
-struct TileSet {
-	Texture texture;
-	int columns;
-	int tileCount;
-	int firstId;
-};
-*/
+
 class Tilemap {
 public:
 	Tilemap();
