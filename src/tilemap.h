@@ -29,6 +29,7 @@ public:
 // private:
 	std::vector<TileLayer> mapLayers;
 	std::vector<Tileset> tilesets;
+	std::vector<Vec2> enemySpawnPoints;
 };
 
 #endif // TILEMAP_H
