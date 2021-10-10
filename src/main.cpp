@@ -269,6 +269,7 @@ int main(int argc, char ** argv) {
 
                 //collide with player
                 if (intersects(bullet_hitbox(bullet.pos), player_hitbox(level.player.pos))) {
+                    //TODO: base this on the define masses
                     level.player.vel += (bullet.vel - level.player.vel) * 0.1f; //TUNE: ratio of player vs. bullet weight
                     //TODO: should we mix in a term here based on what side of the player the bullet hits?
                     level.bullets.remove(i);
@@ -277,7 +278,22 @@ int main(int argc, char ** argv) {
                 }
 
                 //collide with shield
-                //
+                if (intersects(reverse_winding(shield_hitbox(level.player)),
+                               reverse_winding(obb(bullet_hitbox(bullet.pos)))))
+                {
+                    //this check ensures bullets only bounce off the shield's front side, not its back side
+                    if (dot(bullet.vel - level.player.vel, level.player.cursor) < 0) {
+                        //in order to do this properly we have to do proper rigidbody collision response
+                        //so the math gets kind of hairy. equations basically copied from chris hecker's
+                        //collision response articles http://www.chrishecker.com/images/e/e7/Gdmphys3.pdf
+                        //NOTE: because |n| and e are both 1, some equations from the article become simplified
+                        Vec2 normal = noz(level.player.cursor);
+                        Vec2 relVel = bullet.vel - level.player.vel;
+                        float impulse = -2 * dot(relVel, normal) / (1 / BULLET_MASS + 1 / PLAYER_MASS);
+                        bullet.vel += normal * (impulse / BULLET_MASS);
+                        level.player.vel -= normal * (impulse / PLAYER_MASS);
+                    }
+                }
 
                 //TODO: collide with level
             }

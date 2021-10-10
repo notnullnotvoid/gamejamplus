@@ -983,7 +983,7 @@ static inline Mat4 perspective(float fovy, float aspect, float nearPlane, float 
 /// ORIENTED BOUNDING BOXES                                                                                          ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct OBB { Vec2 p[4]; }; //wound clockwise
+struct OBB { Vec2 p[4]; }; //wound clockwise in a positive-y-is-up coordinate system
 
 static inline bool contains(OBB o, Vec2 p) {
     auto a = cross(o.p[1] - o.p[0], p - o.p[0]);
@@ -1010,6 +1010,13 @@ static inline bool intersects(OBB a, OBB b) {
             cross(p1 - p0, a.p[3] - p0) > 0) return false;
     }
     return true;
+}
+
+static inline OBB reverse_winding(OBB o) {
+    Vec2 tmp = o.p[0];
+    o.p[0] = o.p[2];
+    o.p[2] = tmp;
+    return o;
 }
 
 static inline OBB obb(Rect r) {
