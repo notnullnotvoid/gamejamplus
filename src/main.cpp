@@ -263,6 +263,8 @@ int main(int argc, char ** argv) {
 
             //tick enemies and spawn bullets
             for (Enemy & enemy : level.enemies) {
+                if (len(enemy.pos - level.player.pos) > 100) continue;
+
                 //proximity will make enemies shoot slightly faster as you get closer, to keep the game balanced
                 //NOTE: it's important to apply the proximity effect to how fast the timer counts down
                 //      instead of to its starting value, since the latter will inherently create some lag

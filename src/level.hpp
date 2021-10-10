@@ -125,7 +125,13 @@ static inline Level init_level() {
                     section.mapLayers[1].data[section.mapLayers[1].width * y + x] - 1,
                     section.mapLayers[2].data[section.mapLayers[2].width * y + x] - 1,
                 } };
-                //TODO: place enemies
+                static const int ghostIdx = 2;
+                // static const int walkerIdx = 6;
+                int enemyIdx = section.mapLayers[3].data[section.mapLayers[3].width * y + x] - 1;
+                if (enemyIdx == ghostIdx) {
+                    level.enemies.add({ .pos = vec2(x + xstart + rand_float(), y + 0.5f) * UNITS_PER_TILE,
+                                        .timer = rand_float(BULLET_INTERVAL / BULLET_INTERVAL_VARIANCE) });
+                }
             }
         }
         xstart += section.mapLayers[0].width;
@@ -135,14 +141,9 @@ static inline Level init_level() {
 
     //spawn debug/test setup
     level.player.pos = vec2(20, 20);
-    level.enemies.add({ .pos = vec2(-10 + 20, 10 + 30) });
-    level.enemies.add({ .pos = vec2(  3 + 20, 12 + 30) });
-    level.enemies.add({ .pos = vec2( 11 + 20, 10 + 30) });
-    /*
-    for (int i = 0; i < section.enemySpawnPoints.size(); i++) {
-        level.enemies.add({ .pos =  });
-    }
-    */
+    // level.enemies.add({ .pos = vec2(-10 + 20, 10 + 30) });
+    // level.enemies.add({ .pos = vec2(  3 + 20, 12 + 30) });
+    // level.enemies.add({ .pos = vec2( 11 + 20, 10 + 30) });
     level.camCenter = level.player.pos;
 
     return level;
