@@ -21,6 +21,5 @@ venv/
 mesh/mesh
 assets/unsynced
 *.exp
-*.json
 project.4coder
 game.lib

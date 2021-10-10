@@ -56,19 +56,27 @@ static inline Rect bullet_hitbox(Vec2 pos) {
     return { pos.x - w / 2, pos.y - h / 2, w, h };
 }
 
+struct Tile {
+    int fg, bg, collision;
+}
+
 struct Level {
     Player player;
     Vec2 camCenter;
     List<Enemy> enemies;
     List<Bullet> bullets; //TODO: some criteria for despawning bullets
-    Tilemap map;
+
 };
 
 static inline Level init_level() {
     Level level = {};
-    level.map.LoadMap("res/testmap.json");
 
-    level.player.pos = vec2(0, -10);
+    Tilemap sections[3];
+    for (int i = 0; i < ARR_SIZE(sections); ++i) {
+        sections[i].LoadMap(dsprintf(nullptr, "res/section%d.json", i)); //leak
+    }
+
+    level.player.pos = vec2(20, 20);
     level.enemies.add({ .pos = vec2(-10, 10) });
     level.enemies.add({ .pos = vec2(  3, 12) });
     level.enemies.add({ .pos = vec2( 11, 10) });

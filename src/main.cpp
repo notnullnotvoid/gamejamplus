@@ -9,6 +9,7 @@ PREP TODOs:
 
 GAMEPLAY TODOS:
 - sequential / random map loading
+- bounded follow cam
 - collision of player and enemies against level
 - enemy physics???
 - collision detect against enemies
@@ -389,16 +390,6 @@ int main(int argc, char ** argv) {
         draw_sprite_centered(graphics.player, level.player.pos);
         draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
         //draw shield
-        // Vec2 shieldCenter = level.player.pos + noz(level.player.cursor) * SHIELD_DISTANCE;
-        // Vec2 shieldHalfOff = noz(vec2(level.player.cursor.y, -level.player.cursor.x)) * SHIELD_WIDTH * 0.5f;
-        // Coord2 shield1 = coord2((shieldCenter + shieldHalfOff) * PIXELS_PER_UNIT);
-        // Coord2 shield2 = coord2((shieldCenter - shieldHalfOff) * PIXELS_PER_UNIT);
-        // for (int y = -1; y <= +1; ++y) {
-        //     for (int x = -1; x <= +1; ++x) {
-        //         draw_line(canvas, shield1.x - offx + x, shield1.y - offy + y,
-        //                           shield2.x - offx + x, shield2.y - offy + y, { 128, 255, 128, 255 });
-        //     }
-        // }
         auto draw_obb = [&canvas, &offx, &offy] (OBB o, Color c) {
             Coord2 p[4]; for (int i = 0; i < 4; ++i) p[i] = coord2(o.p[i] * PIXELS_PER_UNIT) - coord2(offx, offy);
             draw_triangle(canvas, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, c);
