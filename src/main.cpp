@@ -42,6 +42,7 @@ GAMEPLAY TODOS:
 #include "imgui_impl_opengl3.h"
 #include <SDL.h>
 
+#include <iostream>
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// AUDIO                                                                                                            ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,6 +196,7 @@ int main(int argc, char ** argv) {
         accumulator = fminf(0.5f, accumulator + dt);
         gifTimer += dt;
 
+
         //update
         float gspeed = gameSpeed, tspeed = tickSpeed;
         // if (mode == MODE_EDIT) gspeed = tspeed = 1;
@@ -219,9 +221,9 @@ int main(int argc, char ** argv) {
                     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
                 } else {
                     SDL_SetWindowFullscreen(window, 0);
+                    //std::cout << "Debug!" << std::endl;
                 }
             }
-
             //toggle gif recording
             if (TICK_DOWN(G) && (HELD(LGUI) || HELD(RGUI) || HELD(LCTRL) || HELD(RCTRL))) {
                 giffing = !giffing;
@@ -236,8 +238,6 @@ int main(int argc, char ** argv) {
                     msf_gif_free(result);
                 }
             }
-
-
 
             //game update logic goes here
             //update virtual cursor
