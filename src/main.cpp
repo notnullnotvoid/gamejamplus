@@ -483,8 +483,9 @@ int main(int argc, char ** argv) {
             if (walker.attackTimer > 0) {
                 draw_anim_centered(graphics.walkerAttack, walker.pos,
                                    (1 - (walker.attackTimer / WALKER_ATTACK_TIME)) * graphics.walkerAttack.width);
+            } else {
+                draw_anim_centered(graphics.walkerWalk, walker.pos, 0);
             }
-            draw_anim_centered(graphics.walkerWalk, walker.pos, 0);
         }
 
         //draw bullets
@@ -498,8 +499,12 @@ int main(int argc, char ** argv) {
         }
 
         //DEBUG draw hitboxes
-        draw_hitbox(player_hitbox(level.player.pos));
-        for (Bullet & bullet : level.bullets) draw_hitbox(bullet_hitbox(bullet.pos));
+        static bool debugDraw = false;
+        DEBUG_TOGGLE(debugDraw, FRAME_DOWN(D));
+        if (debugDraw) {
+            draw_hitbox(player_hitbox(level.player.pos));
+            for (Bullet & bullet : level.bullets) draw_hitbox(bullet_hitbox(bullet.pos));
+        }
 
         //distance counter
         {

@@ -22,7 +22,7 @@ static inline Graphics load_graphics() {
     g.tileset = load_tileset("res/groundilesheet.png", 16, 16); //yes it's spelled wrong NO YOU CAN'T CHANGE IT
     g.ghostAnim = load_tileset("res/ghost-anim.png", 16, 16);
     g.walkerWalk = load_tileset("res/walker.png", 16, 32);
-    g.walkerAttack = load_tileset("res/walker-attack.png", 24, 24);
+    g.walkerAttack = load_tileset("res/walker-attack.png", 48, 48);
     return g;
 }
 
