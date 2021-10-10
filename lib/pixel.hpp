@@ -334,6 +334,11 @@ static inline void draw_tile(Canvas & canvas, Tileset & set, int tx, int ty, int
         &set.image[ty * set.tileHeight][tx * set.tileWidth], set.tileWidth, set.tileHeight, set.image.width, cx, cy);
 }
 
+static inline void draw_tile_flip(Canvas & canvas, Tileset & set, int tx, int ty, int cx, int cy, bool flip) {
+    _draw_sprite_flip(canvas, &set.image[ty * set.tileHeight][tx * set.tileWidth],
+        set.tileWidth, set.tileHeight, set.image.width, cx, cy, flip);
+}
+
 static inline void draw_tile_a1(Canvas & canvas, Tileset & set, int tx, int ty, int cx, int cy) {
     _draw_sprite_a1(canvas,
         &set.image[ty * set.tileHeight][tx * set.tileWidth], set.tileWidth, set.tileHeight, set.image.width, cx, cy);

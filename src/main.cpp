@@ -464,9 +464,9 @@ int main(int argc, char ** argv) {
                                         pos.y * PIXELS_PER_UNIT - offy - sprite.height * 0.5f);
         };
 
-        auto draw_anim_centered = [&canvas, &offx, &offy] (Tileset anim, Vec2 pos, int frame) {
-            draw_tile(canvas, anim, frame % anim.width, 0, pos.x * PIXELS_PER_UNIT - offx - anim.tileWidth  * 0.5f,
-                                                           pos.y * PIXELS_PER_UNIT - offy - anim.tileHeight * 0.5f);
+        auto draw_anim_centered = [&canvas, &offx, &offy] (Tileset anim, Vec2 pos, int frame, bool flip) {
+            draw_tile_flip(canvas, anim, frame % anim.width, 0, pos.x * PIXELS_PER_UNIT - offx - anim.tileWidth  * 0.5f,
+                                                                pos.y * PIXELS_PER_UNIT - offy - anim.tileHeight * 0.5f, flip);
         };
 
         auto draw_hitbox = [&canvas, &offx, &offy] (Rect hb) {
@@ -499,9 +499,9 @@ int main(int argc, char ** argv) {
         for (Walker & walker : level.walkers) {
             if (walker.attackTimer > 0) {
                 draw_anim_centered(graphics.walkerAttack, walker.pos,
-                                   (1 - (walker.attackTimer / WALKER_ATTACK_TIME)) * graphics.walkerAttack.width);
+                                   (1 - (walker.attackTimer / WALKER_ATTACK_TIME)) * graphics.walkerAttack.width, !walker.facingRight);
             } else {
-                draw_anim_centered(graphics.walkerWalk, walker.pos, 0);
+                draw_anim_centered(graphics.walkerWalk, walker.pos, walker.walkTimer * WALKER_WALK_SPEED, !walker.facingRight);
             }
         }
 
