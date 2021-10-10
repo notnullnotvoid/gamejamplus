@@ -1,3 +1,4 @@
+#include <iostream>
 #include <fstream>
 #include "tilemap.h"
 
@@ -7,9 +8,6 @@ using json = nlohmann::json;
 
 Tilemap::Tilemap() {}
 Tilemap::~Tilemap() {}
-
-std::vector<TileLayer> mapLayers;
-std::vector<Tileset> tilesets;
 
 void Tilemap::LoadMap(std::string path) {
 	

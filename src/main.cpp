@@ -247,15 +247,21 @@ int main(int argc, char ** argv) {
             if (len(level.player.cursor) > cursorRadiusOuter) level.player.cursor = setlen(level.player.cursor, cursorRadiusOuter);
 
             //apply gravity to player
-            Vec2 gravity = vec2(0, 3.0f);
+            Vec2 gravity = vec2(0, 8.0f);
             level.player.vel += gravity * tick;
             level.player.pos += level.player.vel * tick;
 
             //tick enemies and spawn bullets
             for (Enemy & enemy : level.enemies) {
-                enemy.timer -= tick;
+                //proximity will make enemies shoot slightly faster as you get closer, to keep the game balanced
+                //NOTE: it's important to apply the proximity effect to how fast the timer counts down
+                //      instead of to its starting value, since the latter will inherently create some lag
+                //      in the responsiveness of the effect
+                float proximity = 0.4f * powf(len(enemy.pos - level.player.pos), 1.0f / 3);
+                enemy.timer -= tick / fmaxf(0.2f, proximity);
                 if (enemy.timer < 0) {
-                    enemy.timer = BULLET_INTERVAL;
+                    float random = rand_float(BULLET_INTERVAL_VARIANCE, 1 / BULLET_INTERVAL_VARIANCE);
+                    enemy.timer = BULLET_INTERVAL * random;
                     //TODO: make enemies partly lead their shots
                     level.bullets.add({ .pos = enemy.pos, .vel = noz(level.player.pos - enemy.pos) * BULLET_VEL_MAX });
                 }
@@ -264,10 +270,17 @@ int main(int argc, char ** argv) {
             //tick bullets
             for (int i = 0; i < level.bullets.len; ++i) {
                 Bullet & bullet = level.bullets[i];
+
                 //bullet velocity exponentially decays from the starting velocity down to BULLET_VEL_MIN
                 bullet.vel = noz(bullet.vel) * (BULLET_VEL_MIN + (len(bullet.vel) - BULLET_VEL_MIN) * powf(0.4f, tick));
-                // bullet.vel *= powf(0.1f, tick);
                 bullet.pos += bullet.vel * tick;
+
+                //despawn if very far from the camera
+                if (len(bullet.pos - level.camCenter) > canvas.width / PIXELS_PER_UNIT * 2) {
+                    level.bullets.remove(i);
+                    i -= 1;
+                    continue;
+                }
 
                 //collide with player
                 if (intersects(bullet_hitbox(bullet.pos), player_hitbox(level.player.pos))) {
