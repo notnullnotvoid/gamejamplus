@@ -79,6 +79,21 @@ struct Level {
     TileGrid tiles;
 };
 
+static inline bool collide_with_tiles(TileGrid & tiles, Rect hitbox) {
+    int minx = imax(0, floorf(hitbox.x / UNITS_PER_TILE));
+    int miny = imax(0, floorf(hitbox.y / UNITS_PER_TILE));
+    int maxx = imin(tiles.width , ceilf((hitbox.x + hitbox.w) / UNITS_PER_TILE));
+    int maxy = imin(tiles.height, ceilf((hitbox.y + hitbox.h) / UNITS_PER_TILE));
+    for (int y = miny; y < maxy; ++y) {
+        for (int x = minx; x < maxx; ++x) {
+            if (tiles[y][x].layer[2] >= 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 static inline void draw_tile_grid(Canvas & canvas, TileGrid & tiles, Tileset & tileset, int offx, int offy) { TimeFunc
     int minx = imax(0, floorf(offx / PIXELS_PER_TILE));
     int miny = imax(0, floorf(offy / PIXELS_PER_TILE));

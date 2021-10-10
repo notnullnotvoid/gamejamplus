@@ -8,11 +8,11 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- procedural map stuff
 - collision detect against walls
 - bounded follow cam
 - game over state + restart
 - distance counter
+- walker enemy type
 - player + enemy tuning
 - audio
 - collision detect against enemies?
@@ -274,8 +274,10 @@ int main(int argc, char ** argv) {
                 if (enemy.timer < 0) {
                     float random = rand_float(BULLET_INTERVAL_VARIANCE, 1 / BULLET_INTERVAL_VARIANCE);
                     enemy.timer = BULLET_INTERVAL * random;
+
                     //TODO: make enemies partly lead their shots
-                    level.bullets.add({ .pos = enemy.pos, .vel = noz(level.player.pos - enemy.pos) * BULLET_VEL_MAX });
+                    Vec2 dir = noz(level.player.pos - enemy.pos);
+                    level.bullets.add({ .pos = enemy.pos + dir * 0.5f, .vel = dir * BULLET_VEL_MAX });
                 }
             }
 
@@ -289,6 +291,13 @@ int main(int argc, char ** argv) {
 
                 //despawn if very far from the camera
                 if (len(bullet.pos - level.camCenter) > canvas.width / PIXELS_PER_UNIT * 2) {
+                    level.bullets.remove(i);
+                    i -= 1;
+                    continue;
+                }
+
+                //collide with level
+                if (collide_with_tiles(level.tiles, bullet_hitbox(bullet.pos))) {
                     level.bullets.remove(i);
                     i -= 1;
                     continue;
@@ -321,8 +330,6 @@ int main(int argc, char ** argv) {
                         level.player.vel -= normal * (impulse / PLAYER_MASS);
                     }
                 }
-
-                //TODO: collide with level
             }
 
             //DEBUG update cam
