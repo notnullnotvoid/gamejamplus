@@ -78,6 +78,7 @@ struct Level {
     List<Enemy> enemies;
     List<Bullet> bullets; //TODO: some criteria for despawning bullets
     TileGrid tiles;
+    Vec2 playerStartPos;
 };
 
 static inline bool collide_with_tiles(TileGrid & tiles, Rect hitbox) {
@@ -156,7 +157,7 @@ static inline Level init_level() {
     printf("sectionCount: %d\n", sectionCount);
 
     //spawn debug/test setup
-    level.player.pos = vec2(20, 20);
+    level.playerStartPos = level.player.pos = vec2(20, 20);
     // level.enemies.add({ .pos = vec2(-10 + 20, 10 + 30) });
     // level.enemies.add({ .pos = vec2(  3 + 20, 12 + 30) });
     // level.enemies.add({ .pos = vec2( 11 + 20, 10 + 30) });

@@ -8,7 +8,6 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- bounded follow cam
 - distance counter
 - walker enemy type
 - player + enemy tuning
@@ -86,8 +85,11 @@ static SoLoud::Wav stepSounds[NUM_STEP_SOUNDS];
 #undef main
 #endif
 
+#include <time.h>
+
 int main(int argc, char ** argv) {
     init_profiling_trace();
+    global_pcg_state = time(NULL);
 
     #ifdef _WIN32
         //SDL2 doesn't call SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)
@@ -365,13 +367,12 @@ int main(int argc, char ** argv) {
             }
 
             //update camera
-            //TODO: make this tickrate-independent
             static bool debugCam = false;
             DEBUG_TOGGLE(debugCam, TICK_DOWN(F));
             if (debugCam) {
                 level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 50 * tick;
             } else {
-                level.camCenter += (level.player.pos - level.camCenter) * 0.01f;
+                level.camCenter += (level.player.pos - level.camCenter) * 0.01f; //TODO: tick rate dependent
                 level.camCenter.x = fmaxf(level.camCenter.x, canvas.width / 2.0f / PIXELS_PER_UNIT);
                 level.camCenter.y = fmaxf(level.camCenter.y, canvas.height / 2.0f / PIXELS_PER_UNIT);
                 level.camCenter.y = fminf(level.camCenter.y, level.tiles.height * UNITS_PER_TILE - canvas.height / 2 / PIXELS_PER_UNIT);
@@ -477,13 +478,24 @@ int main(int argc, char ** argv) {
         draw_hitbox(player_hitbox(level.player.pos));
         for (Bullet & bullet : level.bullets) draw_hitbox(bullet_hitbox(bullet.pos));
 
+        //distance counter
+        {
+            char buf[50];
+            snprintf(buf, sizeof(buf), "distance: %.0f meters", level.player.pos.x - level.playerStartPos.x);
+            float r = 4;
+            float w = font.glyphWidth * strlen(buf) + r * 2, h = font.glyphHeight + r * 2;
+            draw_rect(canvas, canvas.width / 2 - w / 2, font.glyphHeight - r, w, h, { 0, 0, 0, 100 });
+            draw_text_center(canvas, font, canvas.width / 2 + 1, font.glyphHeight + 1, { 0, 0, 0, 255 }, buf);
+            draw_text_center(canvas, font, canvas.width / 2 + 0, font.glyphHeight + 0, { 255, 255, 255, 255 }, buf);
+        }
+
         //draw game over screen
         if (level.player.dead) {
             draw_rect(canvas, 0, 0, canvas.width, canvas.height, { 0, 0, 0, 160 });
             Color white = { 255, 255, 255, 255 };
             draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 - 3 * font.glyphHeight, white, "GAME OVER");
             char buf[100] = {};
-            snprintf(buf, sizeof(buf), "You made it %d meters toward freedom...", 0); //TODO: actual score counter
+            snprintf(buf, sizeof(buf), "You made it %.0f meters toward freedom...", level.player.pos.x - level.playerStartPos.x);
             draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 0 * font.glyphHeight, white, buf);
             draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 3 * font.glyphHeight, white, "Press R to try again.");
         }
