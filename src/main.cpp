@@ -255,10 +255,18 @@ int main(int argc, char ** argv) {
             if (len(level.player.cursor) < cursorRadiusInner) level.player.cursor = setlen(level.player.cursor, cursorRadiusInner);
             if (len(level.player.cursor) > cursorRadiusOuter) level.player.cursor = setlen(level.player.cursor, cursorRadiusOuter);
 
-            //apply gravity to player
-            Vec2 gravity = vec2(0, 8.0f);
-            level.player.vel += gravity * tick;
-            level.player.pos += level.player.vel * tick;
+            //tick player
+            if (!level.player.dead) {
+                //apply gravity to player
+                Vec2 gravity = vec2(0, 8.0f);
+                level.player.vel += gravity * tick;
+                level.player.pos += level.player.vel * tick;
+
+                //kill player if they touch any solid geometry
+                if (collide_with_tiles(level.tiles, player_hitbox(level.player.pos))) {
+                    level.player.dead = true;
+                }
+            }
 
             //tick enemies and spawn bullets
             for (Enemy & enemy : level.enemies) {
@@ -279,6 +287,7 @@ int main(int argc, char ** argv) {
                     level.bullets.add({ .pos = enemy.pos + dir * 0.5f, .vel = dir * BULLET_VEL_MAX });
                 }
             }
+
 
             //tick bullets
             for (int i = 0; i < level.bullets.len; ++i) {
@@ -401,16 +410,19 @@ int main(int argc, char ** argv) {
         //draw level
         draw_tile_grid(canvas, level.tiles, graphics.tileset, offx, offy);
 
-        //draw player
-        draw_sprite_centered(graphics.player, level.player.pos);
-        draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
-        //draw shield
-        auto draw_obb = [&canvas, &offx, &offy] (OBB o, Color c) {
-            Coord2 p[4]; for (int i = 0; i < 4; ++i) p[i] = coord2(o.p[i] * PIXELS_PER_UNIT) - coord2(offx, offy);
-            draw_triangle(canvas, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, c);
-            draw_triangle(canvas, p[0].x, p[0].y, p[2].x, p[2].y, p[3].x, p[3].y, c);
-        };
-        draw_obb(shield_hitbox(level.player), { 128, 255, 128, 255 });
+        if (!level.player.dead) {
+            //draw player and cursor
+            draw_sprite_centered(graphics.player, level.player.pos);
+            draw_sprite_centered(graphics.cursor, level.player.pos + level.player.cursor);
+
+            //draw shield
+            auto draw_obb = [&canvas, &offx, &offy] (OBB o, Color c) {
+                Coord2 p[4]; for (int i = 0; i < 4; ++i) p[i] = coord2(o.p[i] * PIXELS_PER_UNIT) - coord2(offx, offy);
+                draw_triangle(canvas, p[0].x, p[0].y, p[1].x, p[1].y, p[2].x, p[2].y, c);
+                draw_triangle(canvas, p[0].x, p[0].y, p[2].x, p[2].y, p[3].x, p[3].y, c);
+            };
+            draw_obb(shield_hitbox(level.player), { 128, 255, 128, 255 });
+        }
 
         //draw enemies
         for (Enemy & enemy : level.enemies) {
@@ -431,11 +443,26 @@ int main(int argc, char ** argv) {
         draw_hitbox(player_hitbox(level.player.pos));
         for (Bullet & bullet : level.bullets) draw_hitbox(bullet_hitbox(bullet.pos));
 
+        //draw game over screen
+        if (level.player.dead) {
+            draw_rect(canvas, 0, 0, canvas.width, canvas.height, { 0, 0, 0, 160 });
+            Color white = { 255, 255, 255, 255 };
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 - 3 * font.glyphHeight, white, "GAME OVER");
+            char buf[100] = {};
+            snprintf(buf, sizeof(buf), "You made it %d meters toward freedom...", 0); //TODO: actual score counter
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 0 * font.glyphHeight, white, buf);
+            draw_text_center(canvas, font, canvas.width / 2, canvas.height / 2 + 3 * font.glyphHeight, white, "Press R to try again.");
+
+            if (FRAME_DOWN(R)) {
+                level = init_level();
+            }
+        }
+
         //framerate display
         {
             char buf[20] = {};
-            snprintf(buf, sizeof(buf), "%4dfps", (int) lroundf(framerate));
-            draw_text(canvas, font, canvas.width - font.glyphWidth * 8, font.glyphHeight, { 255, 255, 255, 255 }, buf);
+            snprintf(buf, sizeof(buf), "%dfps", (int) lroundf(framerate));
+            draw_text_right(canvas, font, canvas.width - font.glyphWidth, font.glyphHeight, { 255, 255, 255, 255 }, buf);
             if (giffing) draw_text(canvas, font, font.glyphWidth, font.glyphHeight, { 255, 255, 255, 255 }, "GIF");
         }
 

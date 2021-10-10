@@ -17,6 +17,7 @@ struct Player {
     Vec2 pos;
     Vec2 vel;
     Vec2 cursor; //virtual mouse cursor in player-relative space
+    bool dead;
 };
 
 //NOTE: I'm giving everything except the shield AABB hitboxes for now to simplify the code

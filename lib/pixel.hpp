@@ -596,6 +596,14 @@ static inline void draw_text(Canvas & canvas, MonoFont & font, int cx, int cy, C
     }
 }
 
+static inline void draw_text_center(Canvas & canvas, MonoFont & font, int cx, int cy, Color color, const char * text) {
+    draw_text(canvas, font, cx - font.glyphWidth * strlen(text) / 2, cy, color, text);
+}
+
+static inline void draw_text_right(Canvas & canvas, MonoFont & font, int cx, int cy, Color color, const char * text) {
+    draw_text(canvas, font, cx - font.glyphWidth * strlen(text), cy, color, text);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// CANVAS OPS                                                                                                       ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
