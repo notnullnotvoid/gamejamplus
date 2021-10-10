@@ -26,7 +26,7 @@ public:
 	void LoadMap(std::string path);
 	void DrawMap(Canvas canvas, int cameraX, int cameraY);
 
-private:
+// private:
 	std::vector<TileLayer> mapLayers;
 	std::vector<Tileset> tilesets;
 };

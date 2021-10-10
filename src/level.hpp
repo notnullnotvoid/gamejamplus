@@ -57,30 +57,79 @@ static inline Rect bullet_hitbox(Vec2 pos) {
 }
 
 struct Tile {
-    int fg, bg, collision;
-}
+    int layer[3];
+};
+
+struct TileGrid {
+    Tile * tiles;
+    int width, height;
+
+    //NOTE: indexed in [y][x] order!!!
+    inline Tile * operator[] (int row) {
+        return tiles + row * width;
+    }
+};
 
 struct Level {
     Player player;
     Vec2 camCenter;
     List<Enemy> enemies;
     List<Bullet> bullets; //TODO: some criteria for despawning bullets
-
+    TileGrid tiles;
 };
+
+static inline void draw_tile_grid(Canvas & canvas, TileGrid & tiles, Tileset & tileset, int offx, int offy) {
+    //TODO: only draw tiles in screen bounds
+    for (int y = 0; y < tiles.height; ++y) {
+        for (int x = 0; x < tiles.width; ++x) {
+            for (int i = 0; i < 3; ++i) {
+                if (tiles[y][x].layer[i] >= 0) {
+                    int tx = tiles[y][x].layer[i] % tileset.width;
+                    int ty = tiles[y][x].layer[i] / tileset.width;
+                    draw_tile(canvas, tileset, tx, ty, x * PIXELS_PER_TILE - offx, y * PIXELS_PER_TILE - offy);
+                }
+            }
+        }
+    }
+}
 
 static inline Level init_level() {
     Level level = {};
 
+    //load Tiled section prefabs
     Tilemap sections[3];
     for (int i = 0; i < ARR_SIZE(sections); ++i) {
         sections[i].LoadMap(dsprintf(nullptr, "res/section%d.json", i)); //leak
+        assert(sections[i].mapLayers.size() == 4);
+        assert(sections[i].mapLayers[0].height == 50);
+        assert(sections[i].mapLayers[1].height == 50);
+        assert(sections[i].mapLayers[2].height == 50);
+        assert(sections[i].mapLayers[3].height == 50);
     }
 
-    level.player.pos = vec2(20, 20);
-    level.enemies.add({ .pos = vec2(-10, 10) });
-    level.enemies.add({ .pos = vec2(  3, 12) });
-    level.enemies.add({ .pos = vec2( 11, 10) });
+    //TODO: generate tile grid by placing sections end-to-end
 
+    //copy section0 data to the tile grid
+    int width = 1000, height = 50;
+    level.tiles = { (Tile *) malloc(width * height * sizeof(Tile)), width, height };
+    Tilemap & section = sections[0];
+    for (int y = 0; y < 50; ++y) {
+        for (int x = 0; x < section.mapLayers[0].width; ++x) {
+            level.tiles[y][x] = { {
+                section.mapLayers[0].data[section.mapLayers[0].width * y + x] - 1,
+                section.mapLayers[1].data[section.mapLayers[1].width * y + x] - 1,
+                section.mapLayers[2].data[section.mapLayers[2].width * y + x] - 1,
+            } };
+            //TODO: place enemies
+        }
+    }
+
+    //spawn debug/test setup
+    level.player.pos = vec2(20, 20);
+    level.enemies.add({ .pos = vec2(-10 + 20, 10 + 30) });
+    level.enemies.add({ .pos = vec2(  3 + 20, 12 + 30) });
+    level.enemies.add({ .pos = vec2( 11 + 20, 10 + 30) });
+    level.camCenter = level.player.pos;
 
     return level;
 }

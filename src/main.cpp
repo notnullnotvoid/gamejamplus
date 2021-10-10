@@ -384,7 +384,7 @@ int main(int argc, char ** argv) {
         };
 
         //draw level
-        level.map.DrawMap(canvas, offx, offy);
+        draw_tile_grid(canvas, level.tiles, graphics.tileset, offx, offy);
 
         //draw player
         draw_sprite_centered(graphics.player, level.player.pos);
