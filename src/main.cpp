@@ -8,8 +8,6 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- fix up sections
-- player + enemy tuning
 - audio
 - tutorial text
 - collision detect against enemies?
@@ -168,11 +166,10 @@ int main(int argc, char ** argv) {
     print_log("[] level init: %f seconds\n", get_time());
         TimeLine("SoLoud init") if (int err = loud.init(); err) printf("soloud init error: %d\n", err);
     print_log("[] soloud init: %f seconds\n", get_time());
-        //TODO: audio
-        // TimeLine("music_test") music_test.load("res/bg1.ogg");
+        TimeLine("music_test") music_test.load("res/wubby_dancer_loop.mp3");
         // TimeLine("sfx_test") sfx_test.load("res/sfx1.wav");
-        // music_test.setLooping(true);
-        // int musicHandle = loud.play(music_test, settings.musicVolume);
+        music_test.setLooping(true);
+        int musicHandle = loud.play(music_test, settings.musicVolume * 0.1f);
         loud.setGlobalVolume(settings.sfxVolume);
     print_log("[] audio init: %f seconds\n", get_time());
         float frameTimes[100] = {};
@@ -201,9 +198,7 @@ int main(int argc, char ** argv) {
     bool shouldExit = false;
     bool fullscreen = false;
     int frameCount = 0;
-
-
-
+    float gameTime = 0;
     while (!shouldExit) { TimeScope("frame loop")
         double preWholeFrameTime = get_time();
         int windowWidth, windowHeight;
@@ -221,7 +216,6 @@ int main(int argc, char ** argv) {
         accumulator = fminf(0.5f, accumulator + dt);
         gifTimer += dt;
 
-
         //update
         float gspeed = gameSpeed, tspeed = tickSpeed;
         // if (mode == MODE_EDIT) gspeed = tspeed = 1;
@@ -234,6 +228,7 @@ int main(int argc, char ** argv) {
         #define TICK_UP(X) (input.tick.keyUp[SDL_SCANCODE_ ## X])
             float tick = tickLength * gspeed;
             accumulator -= tickLength / tspeed;
+            gameTime += tick;
 
             //handle fullscreen toggle
             if (TICK_DOWN(RETURN) && (HELD(LALT) || HELD(RALT))) {
@@ -399,7 +394,7 @@ int main(int argc, char ** argv) {
             if (debugCam) {
                 level.camCenter += vec2(HELD(D) - HELD(A), HELD(S) - HELD(W)) * 50 * tick;
             } else {
-                level.camCenter += (level.player.pos - level.camCenter) * 0.01f; //TODO: tick rate dependent
+                level.camCenter += (level.player.pos + vec2(5, 10) - level.camCenter) * 0.01f; //TODO: tick rate dependent
                 level.camCenter.x = fmaxf(level.camCenter.x, canvas.width / 2.0f / PIXELS_PER_UNIT);
                 level.camCenter.y = fmaxf(level.camCenter.y, canvas.height / 2.0f / PIXELS_PER_UNIT);
                 level.camCenter.y = fminf(level.camCenter.y, level.tiles.height * UNITS_PER_TILE - canvas.height / 2 / PIXELS_PER_UNIT);
@@ -517,7 +512,7 @@ int main(int argc, char ** argv) {
 
         //DEBUG draw hitboxes
         static bool debugDraw = false;
-        DEBUG_TOGGLE(debugDraw, FRAME_DOWN(D));
+        DEBUG_TOGGLE(debugDraw, FRAME_DOWN(H));
         if (debugDraw) {
             draw_hitbox(player_hitbox(level.player.pos));
             for (Bullet & bullet : level.bullets) draw_hitbox(bullet_hitbox(bullet.pos));
