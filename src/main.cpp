@@ -8,7 +8,6 @@ PREP TODOs:
 - screenshot saving???
 
 GAMEPLAY TODOS:
-- audio
 - tutorial text
 - collision detect against enemies?
 - enemy multiplication?
@@ -69,10 +68,10 @@ inline static bool debug_toggle_impl(bool & b, bool c, const char * s1, const ch
 
 static SoLoud::Soloud loud;
 static SoLoud::WavStream music_test;
-static SoLoud::Wav sfx_test;
-
-static const int NUM_STEP_SOUNDS = 7;
-static SoLoud::Wav stepSounds[NUM_STEP_SOUNDS];
+static SoLoud::Wav sfx_slash[2];
+static SoLoud::Wav sfx_shield;
+static SoLoud::Wav sfx_gunshot;
+static SoLoud::Wav sfx_lose;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// MAIN FUNCTION                                                                                                    ///
@@ -112,7 +111,6 @@ int main(int argc, char ** argv) {
         const int pixelScale = 2;
         const int windowWidth = canvasWidth * pixelScale;
         const int windowHeight = canvasHeight * pixelScale;
-        // const int windowDisplay = 0;
 
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -167,10 +165,16 @@ int main(int argc, char ** argv) {
         TimeLine("SoLoud init") if (int err = loud.init(); err) printf("soloud init error: %d\n", err);
     print_log("[] soloud init: %f seconds\n", get_time());
         TimeLine("music_test") music_test.load("res/wubby_dancer_loop.mp3");
-        // TimeLine("sfx_test") sfx_test.load("res/sfx1.wav");
         music_test.setLooping(true);
-        int musicHandle = loud.play(music_test, settings.musicVolume * 0.1f);
-        loud.setGlobalVolume(settings.sfxVolume);
+        sfx_slash[0].load("res/walker-hit1.wav");
+        sfx_slash[1].load("res/walker-hit2.wav");
+        sfx_shield.load("res/hit-shield.wav");
+        sfx_gunshot.load("res/gunshot.mp3");
+        sfx_lose.load("res/lose.wav");
+        // int musicHandle = loud.play(music_test, settings.musicVolume * 0.1f);
+        // loud.setGlobalVolume(settings.sfxVolume);
+        int musicHandle = loud.play(music_test, 0.1f);
+        loud.setGlobalVolume(0.5f);
     print_log("[] audio init: %f seconds\n", get_time());
         float frameTimes[100] = {};
         float accumulator = 0;
@@ -194,6 +198,7 @@ int main(int argc, char ** argv) {
     const float tickLength = 1.0f/250;
     float gameSpeed = 1.0f;
     float tickSpeed = 1.0f;
+    float shakeTimer = 0;
 
     bool shouldExit = false;
     bool fullscreen = false;
@@ -287,6 +292,11 @@ int main(int argc, char ** argv) {
                     level.player.dead = true;
                     settings.bestDistance = fmaxf(settings.bestDistance, level.player.pos.x - level.playerStartPos.x);
                     settings.save();
+
+                    //sound
+                    shakeTimer = 20;
+                    loud.play(sfx_gunshot, 2.0f);
+                    loud.play(sfx_lose, 1.0f);
                 }
             }
 
@@ -357,6 +367,10 @@ int main(int argc, char ** argv) {
                         float impulse = -2 * dot(relVel, normal) / (1 / BULLET_MASS + 1 / PLAYER_MASS);
                         bullet.vel += normal * (impulse / BULLET_MASS);
                         level.player.vel -= normal * (impulse / PLAYER_MASS);
+
+                        //sound
+                        shakeTimer += 0.01f * impulse;
+                        loud.play(sfx_shield, 0.051f * sqrtf(impulse));
                     }
                 }
             }
@@ -364,11 +378,16 @@ int main(int argc, char ** argv) {
             //tick walkers
             for (Walker & walker : level.walkers) {
                 //attack
-                if (walker.attackTimer == 0 && len(level.player.pos - walker.pos) < WALKER_ATTACK_RANGE) {
+                if (!level.player.dead && walker.attackTimer == 0 && len(level.player.pos - walker.pos) < WALKER_ATTACK_RANGE) {
                     level.player.vel.y = 0;
                     level.player.vel -= noz(level.player.cursor) * 20;
                     walker.attackTimer = WALKER_ATTACK_TIME;
                     walker.walkTimer = 0;
+
+                    //sound
+                    shakeTimer += 3;
+                    loud.play(sfx_slash[rand_int(ARR_SIZE(sfx_slash))], 0.5f);
+
                 }
                 walker.attackTimer = fmaxf(0, walker.attackTimer - tick);
 
@@ -445,6 +464,11 @@ int main(int argc, char ** argv) {
         //calculate camera offset
         int offx = level.camCenter.x * PIXELS_PER_UNIT - canvas.width  * 0.5f;
         int offy = level.camCenter.y * PIXELS_PER_UNIT - canvas.height * 0.5f;
+
+        //apply screenshake
+        offx += rand_float(-shakeTimer, shakeTimer);
+        offy += rand_float(-shakeTimer, shakeTimer);
+        shakeTimer = fmaxf(0, shakeTimer - dt * 30);
 
         //clear canvas
         for (int y = 0; y < canvas.height; ++y) {
