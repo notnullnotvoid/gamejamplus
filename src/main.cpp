@@ -173,7 +173,7 @@ int main(int argc, char ** argv) {
         sfx_lose.load("res/lose.wav");
         // int musicHandle = loud.play(music_test, settings.musicVolume * 0.1f);
         // loud.setGlobalVolume(settings.sfxVolume);
-        int musicHandle = loud.play(music_test, 0.1f);
+        // int musicHandle = loud.play(music_test, 0.1f);
         loud.setGlobalVolume(0.5f);
     print_log("[] audio init: %f seconds\n", get_time());
         float frameTimes[100] = {};
@@ -200,6 +200,14 @@ int main(int argc, char ** argv) {
     float tickSpeed = 1.0f;
     float shakeTimer = 0;
 
+    const static float TUTORIAL_TIME = 8;
+    const static char * tutorialLines[] = {
+        "ENEMIES CAN'T HURT YOU",
+        "BUT THE GROUND CAN",
+        "ESCAPE THE CAVERNS",
+        "\x14\x14\x14\x14\x14\x14\x14\x14\x14\x14\x14\x14",
+    };
+
     bool shouldExit = false;
     bool fullscreen = false;
     int frameCount = 0;
@@ -218,7 +226,10 @@ int main(int argc, char ** argv) {
         float dt = thisTime - lastTime;
         assert(dt > 0);
         lastTime = thisTime;
-        accumulator = fminf(0.5f, accumulator + dt);
+        gameTime += dt;
+        if (gameTime > TUTORIAL_TIME) {
+            accumulator = fminf(0.5f, accumulator + dt);
+        }
         gifTimer += dt;
 
         //update
@@ -233,7 +244,6 @@ int main(int argc, char ** argv) {
         #define TICK_UP(X) (input.tick.keyUp[SDL_SCANCODE_ ## X])
             float tick = tickLength * gspeed;
             accumulator -= tickLength / tspeed;
-            gameTime += tick;
 
             //handle fullscreen toggle
             if (TICK_DOWN(RETURN) && (HELD(LALT) || HELD(RALT))) {
@@ -419,9 +429,6 @@ int main(int argc, char ** argv) {
                 level.camCenter.y = fminf(level.camCenter.y, level.tiles.height * UNITS_PER_TILE - canvas.height / 2 / PIXELS_PER_UNIT);
             }
 
-            //DEBUG exit
-            if (TICK_DOWN(ESCAPE)) shouldExit = true;
-
 
 
             reset_tick_transient_state(input);
@@ -553,6 +560,33 @@ int main(int argc, char ** argv) {
             draw_text_center(canvas, font, canvas.width / 2 + 0, font.glyphHeight + 0, { 255, 255, 255, 255 }, buf);
         }
 
+        //draw tutorial screen
+        if (gameTime < TUTORIAL_TIME) {
+            draw_rect(canvas, 0, 0, canvas.width, canvas.height, { 0, 0, 0, 160 });
+
+            int lines = ARR_SIZE(tutorialLines);
+            for (int i = 0; i < lines; ++i) {
+                float trigger = TUTORIAL_TIME / (lines + 2) * (i + 1);
+                if (gameTime - dt <= trigger && gameTime > trigger) {
+                    //sound
+                    shakeTimer = 10;
+                    loud.play(sfx_gunshot, 2.0f);
+                }
+
+                if (gameTime > trigger) {
+                    float x = canvas.width / 2;
+                    float y = canvas.height / 2 - font.glyphHeight * 6 + i * font.glyphHeight * 4;
+                    draw_text_center(canvas, font, x, y, { 255, 255, 255, 255 }, tutorialLines[i]);
+                }
+            }
+        }
+
+        if (gameTime - dt <= TUTORIAL_TIME && gameTime > TUTORIAL_TIME) {
+            // int musicHandle = loud.play(music_test, 0.1f);
+            loud.play(music_test, 0.1f);
+            shakeTimer = 10;
+        }
+
         //draw game over screen
         if (level.player.dead) {
             draw_rect(canvas, 0, 0, canvas.width, canvas.height, { 0, 0, 0, 160 });
@@ -613,6 +647,9 @@ int main(int argc, char ** argv) {
             msf_gif_frame(&gifState, (uint8_t *) canvas.pixels, gifCentiseconds, 15, canvas.pitch * 4);
             gifTimer -= gifCentiseconds / 100.0f;
         }
+
+        //DEBUG exit
+        if (FRAME_DOWN(ESCAPE)) shouldExit = true;
 
         reset_frame_transient_state(input);
 
